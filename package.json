@@ -19,10 +19,15 @@
     "scripts": {
         "build:native": "napi build --platform",
         "build:ts": "tsc",
+        "format": "biome format --write .",
+        "format:check": "biome format .",
+        "lint": "biome lint .",
+        "check": "biome check .",
         "build": "npm run build:native && npm run build:ts",
         "test": "npm run build:native && vitest run"
     },
     "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
         "@napi-rs/cli": "^2.18.4",
         "@types/mocha": "^10.0.10",
         "@types/node": "^18.0.0",
