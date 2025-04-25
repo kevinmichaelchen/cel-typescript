@@ -72,6 +72,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -161,6 +163,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -205,6 +209,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -245,6 +251,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Setup node
         uses: actions/setup-node@v4
