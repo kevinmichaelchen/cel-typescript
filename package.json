@@ -1,6 +1,6 @@
 {
   "name": "cel-typescript",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "type": "module",
   "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
   "repository": {
