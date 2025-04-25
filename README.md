@@ -30,15 +30,25 @@ For simple use cases where you evaluate an expression once:
 import { evaluate } from "cel-typescript";
 
 // Basic string and numeric operations
-await evaluate("size(message) > 5", { message: "Hello World" }); // true
+await evaluate(
+   // 1️⃣ Provide a CEL expression
+   "size(message) > 5",
+   // 2️⃣ Provide a context object
+   { message: "Hello World" },
+); // true
 
 // Complex object traversal and comparison
-await evaluate("user.age >= 18 && user.preferences.notifications", {
-  user: {
-    age: 25,
-    preferences: { notifications: true },
-  },
-}); // true
+await evaluate(
+   // 1️⃣ Provide a CEL expression
+   "user.age >= 18 && user.preferences.notifications",
+   // 2️⃣ Provide a context object
+   {
+     user: {
+       age: 25,
+       preferences: { notifications: true },
+     },
+   },
+); // true
 ```
 
 ### Compile Once, Execute Multiple Times
