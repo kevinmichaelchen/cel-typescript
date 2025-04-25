@@ -174,36 +174,50 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ['18', '20']
+        node:
+          - 18
+          - 20
         platform:
-          # Native platforms (run directly)
-          - name: macOS x64
-            runner: macos-latest
-            target: x86_64-apple-darwin
-            docker: false
-          - name: Windows x64
-            runner: windows-latest
-            target: x86_64-pc-windows-msvc
-            docker: false
-          # Linux platforms (run in Docker)
+          # For non-tag pushes, only test on x64 platforms
           - name: Linux x64
             runner: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            docker: true
-          - name: Linux ARM64
-            runner: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            docker: true
-            qemu: arm64
-          # Android platforms
-          - name: Android ARM64
-            runner: ubuntu-latest
-            target: aarch64-linux-android
-            android: true
-          - name: Android ARM v7
-            runner: ubuntu-latest
-            target: armv7-linux-androideabi
-            android: true
+          - name: macOS x64
+            runner: macos-latest
+            target: x86_64-apple-darwin
+          - name: Windows x64
+            runner: windows-latest
+            target: x86_64-pc-windows-msvc
+        # Include all platforms for tags
+        include:
+          - if: startsWith(github.ref, 'refs/tags/v')
+            node: 18
+            platform:
+              name: Linux ARM64
+              runner: ubuntu-latest
+              target: aarch64-unknown-linux-gnu
+              docker: true
+              qemu: arm64
+          - if: startsWith(github.ref, 'refs/tags/v')
+            node: 18
+            platform:
+              name: macOS ARM64
+              runner: macos-latest
+              target: aarch64-apple-darwin
+          - if: startsWith(github.ref, 'refs/tags/v')
+            node: 18
+            platform:
+              name: Android ARM64
+              runner: ubuntu-latest
+              target: aarch64-linux-android
+              android: true
+          - if: startsWith(github.ref, 'refs/tags/v')
+            node: 18
+            platform:
+              name: Android ARM v7
+              runner: ubuntu-latest
+              target: armv7-linux-androideabi
+              android: true
     runs-on: ${{ matrix.platform.runner }}
 
     steps:
