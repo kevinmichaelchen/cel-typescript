@@ -1,0 +1,290 @@
+name: CI
+env:
+  DEBUG: napi:*
+  APP_NAME: cel-typescript
+  MACOSX_DEPLOYMENT_TARGET: '10.13'
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+  pull_request:
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - host: macos-latest
+            target: x86_64-apple-darwin
+            build: |
+              npm run build
+              strip -x *.node
+          - host: macos-latest
+            target: aarch64-apple-darwin
+            build: |
+              npm run build --target aarch64-apple-darwin
+              strip -x *.node
+          - host: windows-latest
+            target: x86_64-pc-windows-msvc
+            build: yarn build
+          - host: windows-latest
+            target: aarch64-pc-windows-msvc
+            build: npm run build --target aarch64-pc-windows-msvc
+          - host: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
+            build: |
+              set -e &&
+              npm run build --target x86_64-unknown-linux-gnu &&
+              strip *.node
+          - host: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
+            build: |
+              set -e &&
+              npm run build --target aarch64-unknown-linux-gnu &&
+              aarch64-unknown-linux-gnu-strip *.node
+          - host: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+            docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-arm
+            build: |
+              set -e &&
+              npm run build --target armv7-unknown-linux-gnueabihf &&
+              arm-linux-gnueabihf-strip *.node
+          - host: ubuntu-latest
+            target: aarch64-linux-android
+            build: |
+              npm run build --target aarch64-linux-android
+              ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip *.node
+          - host: ubuntu-latest
+            target: armv7-linux-androideabi
+            build: |
+              npm run build --target armv7-linux-androideabi
+              ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip *.node
+
+    name: stable - ${{ matrix.settings.target }} - node@18
+    runs-on: ${{ matrix.settings.host }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        if: ${{ !matrix.settings.docker }}
+        with:
+          node-version: 18
+          check-latest: true
+          cache: npm
+
+      - name: Install
+        uses: dtolnay/rust-toolchain@stable
+        if: ${{ !matrix.settings.docker }}
+        with:
+          targets: ${{ matrix.settings.target }}
+
+      - name: Cache cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            .cargo-cache
+            target/
+          key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}
+
+      - uses: goto-bus-stop/setup-zig@v2
+        if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' }}
+        with:
+          version: 0.11.0
+
+      - name: Setup toolchain
+        if: ${{ matrix.settings.docker }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.settings.target }}
+          override: true
+
+      - name: Cache NPM dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: npm-cache-${{ matrix.settings.target }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build in docker
+        uses: addnab/docker-run-action@v3
+        if: ${{ matrix.settings.docker }}
+        with:
+          image: ${{ matrix.settings.docker }}
+          options: --user 0:0 -v ${{ github.workspace }}/.cargo-cache/git/db:/usr/local/cargo/git/db -v ${{ github.workspace }}/.cargo/registry/cache:/usr/local/cargo/registry/cache -v ${{ github.workspace }}/.cargo/registry/index:/usr/local/cargo/registry/index -v ${{ github.workspace }}:/build -w /build
+          run: ${{ matrix.settings.build }}
+
+      - name: Build
+        if: ${{ !matrix.settings.docker }}
+        run: ${{ matrix.settings.build }}
+        shell: bash
+
+      - name: Upload artifact
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v3
+        with:
+          name: bindings-${{ matrix.settings.target }}
+          path: ${{ env.APP_NAME }}.*.node
+          if-no-files-found: error
+
+  test-macOS-windows-binding:
+    name: Test bindings on ${{ matrix.settings.target }} - node@${{ matrix.node }}
+    needs:
+      - build
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - host: macos-latest
+            target: x86_64-apple-darwin
+          - host: windows-latest
+            target: x86_64-pc-windows-msvc
+        node:
+          - '18'
+          - '20'
+    runs-on: ${{ matrix.settings.host }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          check-latest: true
+          cache: npm
+
+      - name: Cache NPM dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: npm-cache-test-${{ matrix.settings.target }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: bindings-${{ matrix.settings.target }}
+          path: .
+
+      - name: List packages
+        run: ls -R .
+        shell: bash
+
+      - name: Test bindings
+        run: npm test
+
+  test-linux-x64-gnu-binding:
+    name: Test bindings on Linux-x64-gnu - node@${{ matrix.node }}
+    needs:
+      - build
+    strategy:
+      fail-fast: false
+      matrix:
+        node:
+          - '18'
+          - '20'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          check-latest: true
+          cache: npm
+
+      - name: Cache NPM dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: npm-cache-test-linux-x64-gnu-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: bindings-x86_64-unknown-linux-gnu
+          path: .
+
+      - name: List packages
+        run: ls -R .
+        shell: bash
+
+      - name: Test bindings
+        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim npm test
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+      - test-macOS-windows-binding
+      - test-linux-x64-gnu-binding
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          check-latest: true
+          cache: npm
+
+      - name: Cache NPM dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: npm-cache-ubuntu-latest-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Move artifacts
+        run: |
+          mkdir -p dist
+          for artifact in artifacts/bindings-*; do
+            mv $artifact/*.node dist/
+          done
+
+      - name: List packages
+        run: ls -R .
+        shell: bash
+
+      - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "NPM_TOKEN is not set, skipping publish"
+            exit 0
+          fi
+          npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
+          npm publish --access public
