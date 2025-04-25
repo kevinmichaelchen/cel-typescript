@@ -20,6 +20,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Debug - List submodules
+        run: |
+          git submodule status
+          ls -la
+          ls -la cel-rust/
+          ls -la cel-rust/interpreter/
+        shell: bash
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -35,6 +46,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build native module
+        run: npx @napi-rs/cli build --target x86_64-unknown-linux-gnu
 
       - name: Run tests
         run: npm test
