@@ -326,9 +326,7 @@ jobs:
       - name: Move artifacts
         run: |
           mkdir -p dist
-          for artifact in artifacts/bindings-*; do
-            mv $artifact/*.node .
-          done
+          mv artifacts/bindings-*/*.node .
 
       - name: List files
         run: |
