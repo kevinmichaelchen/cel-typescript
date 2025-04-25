@@ -280,7 +280,16 @@ jobs:
         shell: bash
 
       - name: Test bindings
-        run: docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim npm test
+        run: |
+          docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim bash -c '
+            # Install Rust
+            apt-get update && apt-get install -y curl build-essential
+            curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            export PATH="/root/.cargo/bin:$PATH"
+
+            # Run tests
+            npm test
+          '
 
   publish:
     name: Publish
