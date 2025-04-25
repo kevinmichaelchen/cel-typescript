@@ -346,20 +346,20 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
           pattern: bindings-*
-          merge-multiple: true
+          merge-multiple: false
 
       - name: Move artifacts
         run: |
           mkdir -p dist
-          mv artifacts/bindings-*/*.node .
+          find . -type f -name '*.node' -exec mv {} . \;
 
       - name: List files
         run: |
           echo "Root directory:"
           ls -la
           echo "\nNode files:"
+          find . -maxdepth 1 -name '*.node'
           find . -name "*.node"
         shell: bash
 
