@@ -154,6 +154,26 @@ The native module is built using NAPI-RS and provides cross-platform support:
 - This structure allows for seamless cross-platform distribution while
   maintaining platform-specific optimizations
 
+## Development Setup
+
+This project uses git submodules for its Rust dependencies. To get started:
+
+```bash
+# Clone with submodules
+git clone --recurse-submodules https://github.com/clarkmcc/cel-typescript.git
+
+# Or if you've already cloned the repository
+git submodule update --init
+```
+
+After cloning:
+
+```bash
+npm install    # Install dependencies
+npm run build  # Build the project
+npm test       # Run tests
+```
+
 ## How it Works
 
 When you build this project:
