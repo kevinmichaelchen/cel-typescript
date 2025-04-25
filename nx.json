@@ -1,0 +1,51 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "defaultBase": "main",
+  "targetDefaults": {
+    "build:native": {
+      "cache": true,
+      "inputs": [
+        "src/**/*",
+        "Cargo.toml",
+        "Cargo.lock"
+      ],
+      "outputs": ["target/**/*"]
+    },
+    "build:ts": {
+      "cache": true,
+      "inputs": [
+        "src/**/*.ts",
+        "tsconfig.json",
+        "package.json"
+      ],
+      "outputs": ["dist/**/*"]
+    },
+    "test": {
+      "cache": true,
+      "inputs": [
+        "__tests__/**/*",
+        "src/**/*",
+        "vitest.config.ts",
+        "{workspaceRoot}/package.json"
+      ]
+    },
+    "format": {
+      "cache": true,
+      "inputs": [
+        "**/*.{ts,tsx,js,jsx,json,md}",
+        "biome.json"
+      ]
+    },
+    "lint": {
+      "cache": true,
+      "inputs": [
+        "**/*.{ts,tsx,js,jsx}",
+        "biome.json"
+      ]
+    }
+  },
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "production": ["!{projectRoot}/**/*.test.ts"]
+  }
+}

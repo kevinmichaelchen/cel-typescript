@@ -1,0 +1,53 @@
+{
+  "name": "cel-typescript",
+  "$schema": "node_modules/nx/schemas/project-schema.json",
+  "targets": {
+    "build:native": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "napi build --platform"
+      }
+    },
+    "build:ts": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc"
+      }
+    },
+    "build": {
+      "executor": "nx:noop",
+      "dependsOn": ["build:native", "build:ts"]
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run"
+      },
+      "dependsOn": ["build"]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome format --write ."
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome format ."
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome lint ."
+      }
+    },
+    "check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome check ."
+      }
+    }
+  }
+}
