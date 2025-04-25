@@ -14,6 +14,20 @@ calculations, and variable substitutions. CEL is used in various Google products
 and open-source projects for policy enforcement, configuration validation, and
 business rule evaluation.
 
+## Installation
+
+```bash
+npm install cel-typescript
+```
+
+This package includes pre-compiled native binaries for multiple platforms:
+- macOS (x64, arm64)
+- Linux (x64, arm64)
+- Windows (x64)
+- Android (arm64, armv7)
+
+The appropriate binary for your platform will be automatically loaded at runtime.
+
 ## Usage
 
 See the full [language definition][lang-def] for a complete overview of CEL.
