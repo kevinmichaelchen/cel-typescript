@@ -39,7 +39,7 @@ jobs:
           cache: npm
 
       - name: Cache NPM dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: npm-cache-test-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
@@ -53,7 +53,7 @@ jobs:
           targets: x86_64-unknown-linux-gnu
 
       - name: Cache cargo
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry/index/
