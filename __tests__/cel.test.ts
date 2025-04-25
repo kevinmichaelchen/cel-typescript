@@ -83,6 +83,54 @@ describe("CelProgram", () => {
   });
 });
 
+describe("Performance measurements", () => {
+  const measureTime = async <T>(fn: () => Promise<T>): Promise<[T, number]> => {
+    const start = performance.now();
+    const result = await fn();
+    const end = performance.now();
+    // Convert to nanoseconds (1ms = 1,000,000ns)
+    return [result, (end - start) * 1_000_000];
+  };
+
+  it("should measure compile vs execute time", async () => {
+    // Complex expression that requires significant parsing
+    const expr = 'has(items) && items.map(i, i.price).filter(p, p < max_price).size() > 0';
+    const context = {
+      items: Array.from({ length: 100 }, (_, i) => ({ id: i, price: i * 10 })),
+      max_price: 500
+    };
+
+    // Measure compilation time
+    const [program, compileTime] = await measureTime(() => 
+      CelProgram.compile(expr)
+    );
+    console.log(`Compilation took ${compileTime.toFixed(0)} nanoseconds`);
+
+    // Measure execution time
+    const [result, executeTime] = await measureTime(() =>
+      program.execute(context)
+    );
+    console.log(`Execution took ${executeTime.toFixed(0)} nanoseconds`);
+
+    // Measure one-step evaluation time
+    const [, evaluateTime] = await measureTime(() =>
+      CelProgram.evaluate(expr, context)
+    );
+    console.log(`One-step evaluation took ${evaluateTime.toFixed(0)} nanoseconds`);
+
+    // Basic sanity check that the timing data is reasonable
+    expect(compileTime).toBeGreaterThan(0);
+    expect(executeTime).toBeGreaterThan(0);
+    expect(evaluateTime).toBeGreaterThan(0);
+    
+    // The one-step evaluation should be approximately the sum of compile and execute
+    const tolerance = 0.5; // Allow 50% variation due to system noise
+    const expectedEvaluateTime = compileTime + executeTime;
+    expect(evaluateTime).toBeGreaterThan(expectedEvaluateTime * (1 - tolerance));
+    expect(evaluateTime).toBeLessThan(expectedEvaluateTime * (1 + tolerance));
+  });
+});
+
 describe("CelProgram.evaluate", () => {
   it("should evaluate a simple expression in one step", async () => {
     const result = await CelProgram.evaluate("size(message) > 5", {
