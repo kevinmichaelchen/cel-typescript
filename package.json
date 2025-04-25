@@ -1,6 +1,6 @@
 {
   "name": "@kevinmichaelchen/cel-typescript",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "type": "module",
   "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
   "repository": {
@@ -13,6 +13,12 @@
     "url": "https://github.com/kevinmichaelchen/cel-typescript/issues"
   },
   "homepage": "https://github.com/kevinmichaelchen/cel-typescript#readme",
+  "files": [
+    "dist/**/*",
+    "*.node",
+    "index.js",
+    "index.d.ts"
+  ],
   "keywords": [
     "cel",
     "common-expression-language",

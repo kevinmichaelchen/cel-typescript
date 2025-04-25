@@ -33,7 +33,7 @@ class CelProgram {
   static async compile(source: string): Promise<CelProgram> {
     if (!CelProgram.nativeModule) {
       // Use the NAPI-RS generated loader which handles platform detection
-      const nativeBinding = await import("cel-typescript/native");
+      const nativeBinding = await import("@kevinmichaelchen/cel-typescript/native");
       CelProgram.nativeModule = nativeBinding.CelProgram;
       console.log("Imported native CelProgram:", CelProgram.nativeModule);
     }

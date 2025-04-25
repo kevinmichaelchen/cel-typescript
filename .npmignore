@@ -14,5 +14,11 @@ vitest.config.ts
 
 # Build artifacts
 target/
-dist/
 *.tgz
+
+# NX cache
+.nx/
+
+# Keep native binaries and compiled TypeScript
+!*.node
+!dist/
