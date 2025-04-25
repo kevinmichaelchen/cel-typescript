@@ -27,13 +27,13 @@ There are two ways to use CEL expressions in your code:
 For simple use cases where you evaluate an expression once:
 
 ```typescript
-import { CelProgram } from "cel-typescript";
+import { evaluate } from "cel-typescript";
 
 // Basic string and numeric operations
-await CelProgram.evaluate("size(message) > 5", { message: "Hello World" }); // true
+await evaluate("size(message) > 5", { message: "Hello World" }); // true
 
 // Complex object traversal and comparison
-await CelProgram.evaluate("user.age >= 18 && user.preferences.notifications", {
+await evaluate("user.age >= 18 && user.preferences.notifications", {
   user: {
     age: 25,
     preferences: { notifications: true },

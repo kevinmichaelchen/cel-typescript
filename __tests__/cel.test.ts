@@ -138,9 +138,7 @@ describe("Performance measurements", () => {
     console.log(`Execution took ${executeTime.toFixed(0)} nanoseconds`);
 
     // Measure one-step evaluation time
-    const [, evaluateTime] = await measureTime(() =>
-      CelProgram.evaluate(expr, context),
-    );
+    const [, evaluateTime] = await measureTime(() => evaluate(expr, context));
     console.log(
       `One-step evaluation took ${evaluateTime.toFixed(0)} nanoseconds`,
     );
@@ -157,46 +155,5 @@ describe("Performance measurements", () => {
       expectedEvaluateTime * (1 - tolerance),
     );
     expect(evaluateTime).toBeLessThan(expectedEvaluateTime * (1 + tolerance));
-  });
-});
-
-describe("CelProgram.evaluate", () => {
-  it("should evaluate a simple expression in one step", async () => {
-    const result = await CelProgram.evaluate("size(message) > 5", {
-      message: "Hello World",
-    });
-    expect(result).toBe(true);
-  });
-
-  it("should handle errors gracefully", async () => {
-    await expect(
-      CelProgram.evaluate("invalid expression", {}),
-    ).rejects.toThrow();
-  });
-
-  it("should handle complex expressions and data structures", async () => {
-    const result = await CelProgram.evaluate(
-      '{"name": "test", "items": [1, 2, 3].map(i, {"id": i})}',
-      {},
-    );
-    expect(result).toEqual({
-      name: "test",
-      items: [{ id: 1 }, { id: 2 }, { id: 3 }],
-    });
-  });
-
-  it("should handle cart validation in one step", async () => {
-    const expr =
-      'has(cart.items) && cart.items.exists(item, item.productId == "prod_123" && item.quantity >= 1)';
-    const result = await CelProgram.evaluate(expr, {
-      cart: {
-        items: [
-          { productId: "prod_456", quantity: 1 },
-          { productId: "prod_123", quantity: 1 },
-          { productId: "prod_789", quantity: 3 },
-        ],
-      },
-    });
-    expect(result).toBe(true);
   });
 });

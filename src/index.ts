@@ -44,16 +44,6 @@ class CelProgram {
   async execute(context: CelContext): Promise<any> {
     return this.native.execute(context);
   }
-
-  /**
-   * Convenience method to compile and execute a CEL expression in one step.
-   * Note: If you plan to evaluate the same expression multiple times with different contexts,
-   * it's more efficient to use compile() once and then call execute() multiple times.
-   */
-  static async evaluate(source: string, context: CelContext): Promise<any> {
-    const program = await CelProgram.compile(source);
-    return program.execute(context);
-  }
 }
 
 /**
@@ -66,7 +56,8 @@ class CelProgram {
  * @returns The result of evaluating the expression
  */
 async function evaluate(source: string, context: CelContext): Promise<any> {
-  return CelProgram.evaluate(source, context);
+  const program = await CelProgram.compile(source);
+  return program.execute(context);
 }
 
 export { CelProgram, evaluate };
