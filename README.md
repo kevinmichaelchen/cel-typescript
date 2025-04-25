@@ -179,7 +179,7 @@ This project uses git submodules for its Rust dependencies. To get started:
 git clone --recurse-submodules https://github.com/clarkmcc/cel-typescript.git
 
 # Or if you've already cloned the repository
-git submodule update --init
+git submodule update --init --recursive
 ```
 
 After cloning:

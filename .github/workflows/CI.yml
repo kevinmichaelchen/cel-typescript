@@ -74,6 +74,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+
+      - name: Debug - List submodules
+        run: |
+          git submodule status
+          ls -la
+          ls -la cel-rust/
+          ls -la cel-rust/interpreter/
+        shell: bash
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -165,6 +174,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+
+      - name: Debug - List submodules
+        run: |
+          git submodule status
+          ls -la
+          ls -la cel-rust/
+          ls -la cel-rust/interpreter/
+        shell: bash
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -211,6 +229,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+
+      - name: Debug - List submodules
+        run: |
+          git submodule status
+          ls -la
+          ls -la cel-rust/
+          ls -la cel-rust/interpreter/
+        shell: bash
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -253,6 +280,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+
+      - name: Debug - List submodules
+        run: |
+          git submodule status
+          ls -la
+          ls -la cel-rust/
+          ls -la cel-rust/interpreter/
+        shell: bash
 
       - name: Setup node
         uses: actions/setup-node@v4
