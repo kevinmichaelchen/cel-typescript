@@ -7,7 +7,12 @@
       "options": {
         "command": "npx @napi-rs/cli build --platform"
       },
-      "outputs": ["{workspaceRoot}/cel-typescript.darwin-arm64.node", "{workspaceRoot}/cel-typescript.darwin-x64.node", "{workspaceRoot}/cel-typescript.linux-x64-gnu.node", "{workspaceRoot}/cel-typescript.win32-x64-msvc.node"]
+      "outputs": [
+        "{workspaceRoot}/cel-typescript.darwin-arm64.node",
+        "{workspaceRoot}/cel-typescript.darwin-x64.node",
+        "{workspaceRoot}/cel-typescript.linux-x64-gnu.node",
+        "{workspaceRoot}/cel-typescript.win32-x64-msvc.node"
+      ]
     },
     "build:ts": {
       "executor": "nx:run-commands",
@@ -23,10 +28,7 @@
     "clean": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "rm -rf dist",
-          "rm -f *.node"
-        ],
+        "commands": ["rm -rf dist", "rm -f *.node"],
         "parallel": false
       }
     },
