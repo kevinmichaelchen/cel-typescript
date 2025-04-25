@@ -2,6 +2,25 @@
   "name": "cel-typescript",
   "version": "0.1.0",
   "type": "module",
+  "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clarkmcc/cel-typescript.git"
+  },
+  "author": "Clark McCauley",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/clarkmcc/cel-typescript/issues"
+  },
+  "homepage": "https://github.com/clarkmcc/cel-typescript#readme",
+  "keywords": [
+    "cel",
+    "common-expression-language",
+    "expression-language",
+    "policy",
+    "rust",
+    "napi-rs"
+  ],
   "engines": {
     "node": ">=18.0.0"
   },
