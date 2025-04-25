@@ -33,15 +33,14 @@ import { evaluate } from "cel-typescript";
 await evaluate(
    // 1️⃣ Provide a CEL expression
    "size(message) > 5",
+   
    // 2️⃣ Provide a context object
    { message: "Hello World" },
 ); // true
 
 // Complex object traversal and comparison
 await evaluate(
-   // 1️⃣ Provide a CEL expression
    "user.age >= 18 && user.preferences.notifications",
-   // 2️⃣ Provide a context object
    {
      user: {
        age: 25,
