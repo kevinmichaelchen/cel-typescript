@@ -2,7 +2,7 @@ export interface CelContext {
   [key: string]: any;
 }
 
-export class CelProgram {
+class CelProgram {
   private static nativeModule: any;
   private native: any;
 
@@ -56,4 +56,17 @@ export class CelProgram {
   }
 }
 
-export default CelProgram;
+/**
+ * Convenience function to compile and execute a CEL expression in one step.
+ * Note: If you plan to evaluate the same expression multiple times with different contexts,
+ * it's more efficient to use CelProgram.compile() once and then call execute() multiple times.
+ *
+ * @param source The CEL expression to evaluate
+ * @param context The context object containing variables for the expression
+ * @returns The result of evaluating the expression
+ */
+async function evaluate(source: string, context: CelContext): Promise<any> {
+  return CelProgram.evaluate(source, context);
+}
+
+export { CelProgram, evaluate };

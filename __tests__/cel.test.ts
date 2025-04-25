@@ -1,5 +1,29 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { CelProgram } from "../src/index.js";
+import { CelProgram, evaluate } from "../src/index.js";
+
+describe("evaluate", () => {
+  it("should evaluate a simple expression", async () => {
+    const result = await evaluate("size(message) > 5", {
+      message: "Hello World",
+    });
+    expect(result).toBe(true);
+  });
+
+  it("should handle errors gracefully", async () => {
+    await expect(evaluate("invalid expression", {})).rejects.toThrow();
+  });
+
+  it("should handle CEL map return values", async () => {
+    const result = await evaluate(
+      '{"name": "test", "items": [1, 2, 3].map(i, {"id": i})}',
+      {},
+    );
+    expect(result).toEqual({
+      name: "test",
+      items: [{ id: 1 }, { id: 2 }, { id: 3 }],
+    });
+  });
+});
 
 describe("CelProgram", () => {
   it("should evaluate a simple expression", async () => {
@@ -94,39 +118,44 @@ describe("Performance measurements", () => {
 
   it("should measure compile vs execute time", async () => {
     // Complex expression that requires significant parsing
-    const expr = 'has(items) && items.map(i, i.price).filter(p, p < max_price).size() > 0';
+    const expr =
+      "has(items) && items.map(i, i.price).filter(p, p < max_price).size() > 0";
     const context = {
       items: Array.from({ length: 100 }, (_, i) => ({ id: i, price: i * 10 })),
-      max_price: 500
+      max_price: 500,
     };
 
     // Measure compilation time
-    const [program, compileTime] = await measureTime(() => 
-      CelProgram.compile(expr)
+    const [program, compileTime] = await measureTime(() =>
+      CelProgram.compile(expr),
     );
     console.log(`Compilation took ${compileTime.toFixed(0)} nanoseconds`);
 
     // Measure execution time
     const [result, executeTime] = await measureTime(() =>
-      program.execute(context)
+      program.execute(context),
     );
     console.log(`Execution took ${executeTime.toFixed(0)} nanoseconds`);
 
     // Measure one-step evaluation time
     const [, evaluateTime] = await measureTime(() =>
-      CelProgram.evaluate(expr, context)
+      CelProgram.evaluate(expr, context),
     );
-    console.log(`One-step evaluation took ${evaluateTime.toFixed(0)} nanoseconds`);
+    console.log(
+      `One-step evaluation took ${evaluateTime.toFixed(0)} nanoseconds`,
+    );
 
     // Basic sanity check that the timing data is reasonable
     expect(compileTime).toBeGreaterThan(0);
     expect(executeTime).toBeGreaterThan(0);
     expect(evaluateTime).toBeGreaterThan(0);
-    
+
     // The one-step evaluation should be approximately the sum of compile and execute
     const tolerance = 0.5; // Allow 50% variation due to system noise
     const expectedEvaluateTime = compileTime + executeTime;
-    expect(evaluateTime).toBeGreaterThan(expectedEvaluateTime * (1 - tolerance));
+    expect(evaluateTime).toBeGreaterThan(
+      expectedEvaluateTime * (1 - tolerance),
+    );
     expect(evaluateTime).toBeLessThan(expectedEvaluateTime * (1 + tolerance));
   });
 });
