@@ -1,0 +1,36 @@
+{
+    "name": "cel-typescript",
+    "version": "0.1.0",
+    "type": "module",
+    "exports": {
+        ".": {
+            "import": "./dist/src/index.js",
+            "types": "./dist/src/index.d.ts"
+        }
+    },
+    "types": "./dist/src/index.d.ts",
+    "napi": {
+        "name": "cel-typescript",
+        "triples": {
+            "defaults": true,
+            "additional": []
+        }
+    },
+    "scripts": {
+        "build:native": "napi build --platform",
+        "build:ts": "tsc",
+        "build": "npm run build:native && npm run build:ts",
+        "test": "npm run build:native && vitest run"
+    },
+    "devDependencies": {
+        "@napi-rs/cli": "^2.18.4",
+        "@types/mocha": "^10.0.10",
+        "@types/node": "^18.0.0",
+        "jest": "^29.5.0",
+        "mocha": "^11.1.0",
+        "ts-jest": "^29.1.0",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.0.0",
+        "vitest": "^3.1.2"
+    }
+}
