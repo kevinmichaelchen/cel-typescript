@@ -229,7 +229,10 @@ jobs:
             ~/.cargo/git/db/
             .cargo-cache
             target/
-          key: deps-${{ matrix.platform.target }}-${{ matrix.node }}-${{ hashFiles('package-lock.json', '**/Cargo.lock') }}
+          key: >
+            deps-${{ matrix.platform.target }}-${{ matrix.node }}-
+            ${{ contains(matrix.platform.target, 'aarch64') && 'npm-install' || 'npm-ci' }}-
+            ${{ hashFiles('package-lock.json', '**/Cargo.lock') }}
 
       - name: Install dependencies
         run: npm ci
@@ -270,6 +273,16 @@ jobs:
               apt-get update && apt-get install -y curl build-essential
               curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
               export PATH="/root/.cargo/bin:$PATH"
+
+              # Fix npm optional dependencies on ARM64
+              if [[ "${{ matrix.platform.target }}" == *"aarch64"* ]]; then
+                # Ensure clean state
+                rm -rf node_modules
+                # Install dependencies with --no-optional to skip problematic deps
+                npm install --no-optional
+                # Now install only the required optional deps
+                npm install @rollup/rollup-linux-arm64-gnu
+              fi
 
               # Run tests
               npm test
