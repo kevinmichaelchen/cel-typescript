@@ -67,6 +67,9 @@ impl CelProgram {
             Value::List(list) => JsonValue::Array(
                 list.iter().map(|v| Self::cel_to_json_value(v.clone())).collect()
             ),
+            Value::Map(map) => JsonValue::Object(
+                map.map.iter().map(|(k, v)| (k.to_string(), Self::cel_to_json_value(v.clone()))).collect()
+            ),
             _ => JsonValue::Null,
         }
     }

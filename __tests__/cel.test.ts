@@ -12,6 +12,19 @@ describe("CelProgram", () => {
     await expect(CelProgram.compile("invalid expression")).rejects.toThrow();
   });
 
+  it("should handle CEL map return values", async () => {
+    const program = await CelProgram.compile('{"name": "test", "items": [1, 2, 3].map(i, {"id": i})}');
+    const result = await program.execute({});
+    expect(result).toEqual({
+      name: "test",
+      items: [
+        { id: 1 },
+        { id: 2 },
+        { id: 3 }
+      ]
+    });
+  });
+
   describe("cart validation", () => {
     const expr =
       'has(cart.items) && cart.items.exists(item, item.productId == "prod_123" && item.quantity >= 1)';
