@@ -20,6 +20,9 @@ business rule evaluation.
 npm install cel-typescript
 ```
 
+**Requirements:**
+- Node.js 18 or later
+
 This package includes pre-compiled native binaries for multiple platforms:
 
 - macOS (x64, arm64)
