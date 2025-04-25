@@ -5,14 +5,14 @@
   "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/clarkmcc/cel-typescript.git"
+    "url": "git+https://github.com/kevinmichaelchen/cel-typescript.git"
   },
-  "author": "Clark McCauley",
+  "author": "Kevin Chen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/clarkmcc/cel-typescript/issues"
+    "url": "https://github.com/kevinmichaelchen/cel-typescript/issues"
   },
-  "homepage": "https://github.com/clarkmcc/cel-typescript#readme",
+  "homepage": "https://github.com/kevinmichaelchen/cel-typescript#readme",
   "keywords": [
     "cel",
     "common-expression-language",
