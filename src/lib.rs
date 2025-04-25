@@ -44,7 +44,13 @@ impl CelProgram {
                 let values: Vec<Value> = arr.iter().map(|v| Self::json_to_cel_value(v)).collect();
                 Value::List(Arc::new(values))
             },
-            JsonValue::Object(_) => Value::Null, // Maps are handled differently in context
+            JsonValue::Object(map) => {
+                let mut cel_map = std::collections::HashMap::new();
+                for (key, value) in map {
+                    cel_map.insert(key.clone(), Self::json_to_cel_value(value));
+                }
+                Value::Map(cel_map.into())
+            }
         }
     }
 
