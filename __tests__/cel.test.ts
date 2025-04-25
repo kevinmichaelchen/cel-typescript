@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { CelProgram } from "../src/index.js";
 
 describe("CelProgram", () => {
@@ -13,15 +13,13 @@ describe("CelProgram", () => {
   });
 
   it("should handle CEL map return values", async () => {
-    const program = await CelProgram.compile('{"name": "test", "items": [1, 2, 3].map(i, {"id": i})}');
+    const program = await CelProgram.compile(
+      '{"name": "test", "items": [1, 2, 3].map(i, {"id": i})}',
+    );
     const result = await program.execute({});
     expect(result).toEqual({
       name: "test",
-      items: [
-        { id: 1 },
-        { id: 2 },
-        { id: 3 }
-      ]
+      items: [{ id: 1 }, { id: 2 }, { id: 3 }],
     });
   });
 

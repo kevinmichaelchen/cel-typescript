@@ -19,8 +19,8 @@
     "scripts": {
         "build:native": "nx build:native",
         "build:ts": "nx build:ts",
-        "format": "nx format",
-        "format:check": "nx format:check",
+        "format": "nx run cel-typescript:format",
+        "format:check": "nx run cel-typescript:format:check",
         "lint": "nx lint",
         "check": "nx check",
         "build": "nx build",
