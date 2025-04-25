@@ -82,3 +82,44 @@ describe("CelProgram", () => {
     });
   });
 });
+
+describe("CelProgram.evaluate", () => {
+  it("should evaluate a simple expression in one step", async () => {
+    const result = await CelProgram.evaluate("size(message) > 5", {
+      message: "Hello World",
+    });
+    expect(result).toBe(true);
+  });
+
+  it("should handle errors gracefully", async () => {
+    await expect(
+      CelProgram.evaluate("invalid expression", {}),
+    ).rejects.toThrow();
+  });
+
+  it("should handle complex expressions and data structures", async () => {
+    const result = await CelProgram.evaluate(
+      '{"name": "test", "items": [1, 2, 3].map(i, {"id": i})}',
+      {},
+    );
+    expect(result).toEqual({
+      name: "test",
+      items: [{ id: 1 }, { id: 2 }, { id: 3 }],
+    });
+  });
+
+  it("should handle cart validation in one step", async () => {
+    const expr =
+      'has(cart.items) && cart.items.exists(item, item.productId == "prod_123" && item.quantity >= 1)';
+    const result = await CelProgram.evaluate(expr, {
+      cart: {
+        items: [
+          { productId: "prod_456", quantity: 1 },
+          { productId: "prod_123", quantity: 1 },
+          { productId: "prod_789", quantity: 3 },
+        ],
+      },
+    });
+    expect(result).toBe(true);
+  });
+});
