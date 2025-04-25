@@ -167,36 +167,50 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  test-macOS-windows-binding:
-    name: Test bindings on ${{ matrix.settings.target }} - node@${{ matrix.node }}
+  test:
+    name: Test ${{ matrix.platform.name }} - node@${{ matrix.node }}
     needs:
       - build
     strategy:
       fail-fast: false
       matrix:
-        settings:
-          - host: macos-latest
+        node: ['18', '20']
+        platform:
+          # Native platforms (run directly)
+          - name: macOS x64
+            runner: macos-latest
             target: x86_64-apple-darwin
-          - host: windows-latest
+            docker: false
+          - name: Windows x64
+            runner: windows-latest
             target: x86_64-pc-windows-msvc
-        node:
-          - '18'
-          - '20'
-    runs-on: ${{ matrix.settings.host }}
+            docker: false
+          # Linux platforms (run in Docker)
+          - name: Linux x64
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            docker: true
+          - name: Linux ARM64
+            runner: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            docker: true
+            qemu: arm64
+          # Android platforms
+          - name: Android ARM64
+            runner: ubuntu-latest
+            target: aarch64-linux-android
+            android: true
+          - name: Android ARM v7
+            runner: ubuntu-latest
+            target: armv7-linux-androideabi
+            android: true
+    runs-on: ${{ matrix.platform.runner }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - name: Debug - List submodules
-        run: |
-          git submodule status
-          ls -la
-          ls -la cel-rust/
-          ls -la cel-rust/interpreter/
-        shell: bash
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -205,91 +219,61 @@ jobs:
           check-latest: true
           cache: npm
 
-      - name: Cache NPM dependencies
+      - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: node_modules
-          key: npm-cache-test-${{ matrix.settings.target }}-${{ hashFiles('package-lock.json') }}
+          path: |
+            node_modules
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            .cargo-cache
+            target/
+          key: deps-${{ matrix.platform.target }}-${{ matrix.node }}-${{ hashFiles('package-lock.json', '**/Cargo.lock') }}
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup QEMU
+        if: matrix.platform.qemu
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: ${{ matrix.platform.qemu }}
+
+      - name: Install Android NDK
+        if: matrix.platform.android
+        run: |
+          wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+          unzip android-ndk-r25c-linux.zip
+          echo "ANDROID_NDK_HOME=$PWD/android-ndk-r25c" >> $GITHUB_ENV
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: bindings-${{ matrix.settings.target }}
+          name: bindings-${{ matrix.platform.target }}
           path: .
 
-      - name: List packages
+      - name: List files
         run: ls -R .
         shell: bash
 
-      - name: Test bindings
+      - name: Test bindings (native)
+        if: "!matrix.platform.docker"
         run: npm test
 
-  test-linux-x64-gnu-binding:
-    name: Test bindings on Linux-x64-gnu - node@${{ matrix.node }}
-    needs:
-      - build
-    strategy:
-      fail-fast: false
-      matrix:
-        node:
-          - '18'
-          - '20'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Debug - List submodules
+      - name: Test bindings (Docker)
+        if: matrix.platform.docker
         run: |
-          git submodule status
-          ls -la
-          ls -la cel-rust/
-          ls -la cel-rust/interpreter/
-        shell: bash
+          docker run --rm ${{ matrix.platform.qemu && format('--platform linux/{0}', matrix.platform.qemu) || '' }} \
+            -v $(pwd):/build -w /build node:${{ matrix.node }}-slim bash -c '
+              # Install Rust
+              apt-get update && apt-get install -y curl build-essential
+              curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+              export PATH="/root/.cargo/bin:$PATH"
 
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-          check-latest: true
-          cache: npm
-
-      - name: Cache NPM dependencies
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: npm-cache-test-linux-x64-gnu-${{ hashFiles('package-lock.json') }}
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: bindings-x86_64-unknown-linux-gnu
-          path: .
-
-      - name: List packages
-        run: ls -R .
-        shell: bash
-
-      - name: Test bindings
-        run: |
-          docker run --rm -v $(pwd):/build -w /build node:${{ matrix.node }}-slim bash -c '
-            # Install Rust
-            apt-get update && apt-get install -y curl build-essential
-            curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-            export PATH="/root/.cargo/bin:$PATH"
-
-            # Run tests
-            npm test
-          '
+              # Run tests
+              npm test
+            '
 
   publish:
     name: Publish
@@ -299,8 +283,8 @@ jobs:
       id-token: write
     if: startsWith(github.ref, 'refs/tags/v')
     needs:
-      - test-macOS-windows-binding
-      - test-linux-x64-gnu-binding
+      - build
+      - test
 
     steps:
       - uses: actions/checkout@v4
