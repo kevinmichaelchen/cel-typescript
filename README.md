@@ -12,34 +12,60 @@ See the full [language definition][lang-def] for a complete overview of CEL.
 
 [lang-def]: https://github.com/google/cel-spec/blob/master/doc/langdef.md
 
+There are two ways to use CEL expressions in your code:
+
+### One-Step Evaluation
+
+For simple use cases where you evaluate an expression once:
+
 ```typescript
 import { CelProgram } from 'cel-typescript';
 
 // Basic string and numeric operations
-const program1 = await CelProgram.compile('size(message) > 5');
-await program1.execute({ message: 'Hello World' }); // true
+await CelProgram.evaluate('size(message) > 5', { message: 'Hello World' }); // true
 
 // Complex object traversal and comparison
-const program2 = await CelProgram.compile('user.age >= 18 && user.preferences.notifications');
-await program2.execute({
-  user: {
-    age: 25,
-    preferences: { notifications: true }
+await CelProgram.evaluate(
+  'user.age >= 18 && user.preferences.notifications',
+  {
+    user: {
+      age: 25,
+      preferences: { notifications: true }
+    }
   }
-}); // true
+); // true
+```
 
-// List operations and built-in functions
-const program3 = await CelProgram.compile('items.filter(i, i.price < 100).size() > 0');
-await program3.execute({
+### Compile Once, Execute Multiple Times
+
+For better performance when evaluating the same expression multiple times with different contexts:
+
+```typescript
+import { CelProgram } from 'cel-typescript';
+
+// Compile the expression once
+const program = await CelProgram.compile('items.filter(i, i.price < max_price).size() > 0');
+
+// Execute multiple times with different contexts
+await program.execute({
   items: [
     { name: 'Book', price: 15 },
     { name: 'Laptop', price: 1000 }
-  ]
+  ],
+  max_price: 100
+}); // true
+
+await program.execute({
+  items: [
+    { name: 'Phone', price: 800 },
+    { name: 'Tablet', price: 400 }
+  ],
+  max_price: 500
 }); // true
 
 // Date/time operations using timestamp() macro
-const program4 = await CelProgram.compile('timestamp(event_time) < timestamp("2025-01-01T00:00:00Z")');
-await program4.execute({
+const timeProgram = await CelProgram.compile('timestamp(event_time) < timestamp("2025-01-01T00:00:00Z")');
+await timeProgram.execute({
   event_time: '2024-12-31T23:59:59Z'
 }); // true
 ```
