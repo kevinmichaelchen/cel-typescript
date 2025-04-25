@@ -21,12 +21,14 @@ npm install cel-typescript
 ```
 
 This package includes pre-compiled native binaries for multiple platforms:
+
 - macOS (x64, arm64)
 - Linux (x64, arm64)
 - Windows (x64)
 - Android (arm64, armv7)
 
-The appropriate binary for your platform will be automatically loaded at runtime.
+The appropriate binary for your platform will be automatically loaded at
+runtime.
 
 ## Usage
 
@@ -45,23 +47,20 @@ import { evaluate } from "cel-typescript";
 
 // Basic string and numeric operations
 await evaluate(
-   // 1️⃣ Provide a CEL expression
-   "size(message) > 5",
-   
-   // 2️⃣ Provide a context object
-   { message: "Hello World" },
+  // 1️⃣ Provide a CEL expression
+  "size(message) > 5",
+
+  // 2️⃣ Provide a context object
+  { message: "Hello World" },
 ); // true
 
 // Complex object traversal and comparison
-await evaluate(
-   "user.age >= 18 && user.preferences.notifications",
-   {
-     user: {
-       age: 25,
-       preferences: { notifications: true },
-     },
-   },
-); // true
+await evaluate("user.age >= 18 && user.preferences.notifications", {
+  user: {
+    age: 25,
+    preferences: { notifications: true },
+  },
+}); // true
 ```
 
 ### Compile Once, Execute Multiple Times
@@ -139,7 +138,7 @@ This project consists of three main components:
    the native module, handling type conversions and providing a more idiomatic
    JavaScript experience.
 
-## Native Module Structure
+### Native Module Structure
 
 The native module is built using NAPI-RS and provides cross-platform support:
 
@@ -154,7 +153,24 @@ The native module is built using NAPI-RS and provides cross-platform support:
 - This structure allows for seamless cross-platform distribution while
   maintaining platform-specific optimizations
 
-## Development Setup
+### How it Works
+
+When you build this project:
+
+1. The Rust code in `src/lib.rs` is compiled into a native Node.js addon
+   (`.node` file) using NAPI-RS
+2. The TypeScript code in `src/index.ts` is compiled to JavaScript
+3. The native module is loaded by Node.js when you import the package
+
+The build process creates several important files:
+
+- `.node` file: The compiled native module containing the Rust code
+- `index.js`: The compiled JavaScript wrapper around the native module
+- `index.d.ts`: TypeScript type definitions generated from the Rust code
+
+## Contributing
+
+### cel-rust submodule
 
 This project uses git submodules for its Rust dependencies. To get started:
 
@@ -173,61 +189,6 @@ npm install    # Install dependencies
 npm run build  # Build the project
 npm test       # Run tests
 ```
-
-## How it Works
-
-When you build this project:
-
-1. The Rust code in `src/lib.rs` is compiled into a native Node.js addon
-   (`.node` file) using NAPI-RS
-2. The TypeScript code in `src/index.ts` is compiled to JavaScript
-3. The native module is loaded by Node.js when you import the package
-
-The build process creates several important files:
-
-- `.node` file: The compiled native module containing the Rust code
-- `index.js`: The compiled JavaScript wrapper around the native module
-- `index.d.ts`: TypeScript type definitions generated from the Rust code
-
-## Building
-
-```bash
-# Build the native module and TypeScript code
-npm run build
-
-# Run tests
-npm test
-```
-
-## Development
-
-### Prerequisites
-
-1. Clone the [cel-rust](https://github.com/clarkmcc/cel-rust) repository as a
-   sibling to this project:
-
-   ```bash
-   parent-directory/
-   ├── cel-rust/
-   └── cel-typescript/
-   ```
-
-   This is required because the project depends on `cel-interpreter` from the
-   local cel-rust project (as specified in Cargo.toml).
-
-2. Ensure you have Rust and Node.js installed.
-
-### Project Structure
-
-The project uses:
-
-- `napi-rs` for Rust/Node.js bindings
-- `vitest` for testing
-- TypeScript for type safety
-- CEL for expression evaluation
-
-To modify the native module, edit `src/lib.rs`. To modify the TypeScript
-interface, edit `src/index.ts`.
 
 ## License
 
