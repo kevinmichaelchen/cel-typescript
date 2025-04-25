@@ -9,7 +9,7 @@
     },
     "./native": {
       "import": "./index.js",
-      "types": "./native.d.ts"
+      "types": "./index.d.ts"
     }
   },
   "types": "./dist/src/index.d.ts",
