@@ -8,7 +8,8 @@
       "types": "./dist/src/index.d.ts"
     },
     "./native": {
-      "import": "./index.js"
+      "import": "./index.js",
+      "types": "./native.d.ts"
     }
   },
   "types": "./dist/src/index.d.ts",
