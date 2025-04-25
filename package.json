@@ -24,7 +24,8 @@
         "lint": "nx lint",
         "check": "nx check",
         "build": "nx build",
-        "test": "nx test"
+        "test": "nx test",
+        "clean": "nx clean"
     },
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",

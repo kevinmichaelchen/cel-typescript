@@ -5,18 +5,30 @@
     "build:native": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "napi build --platform"
-      }
+        "command": "npx @napi-rs/cli build --platform"
+      },
+      "outputs": ["{workspaceRoot}/cel-typescript.darwin-arm64.node", "{workspaceRoot}/cel-typescript.darwin-x64.node", "{workspaceRoot}/cel-typescript.linux-x64-gnu.node", "{workspaceRoot}/cel-typescript.win32-x64-msvc.node"]
     },
     "build:ts": {
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc"
-      }
+      },
+      "outputs": ["{workspaceRoot}/dist/**/*"]
     },
     "build": {
       "executor": "nx:noop",
       "dependsOn": ["build:native", "build:ts"]
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "rm -rf dist",
+          "rm -f *.node"
+        ],
+        "parallel": false
+      }
     },
     "test": {
       "executor": "nx:run-commands",

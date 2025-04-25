@@ -5,42 +5,44 @@
     "build:native": {
       "cache": true,
       "inputs": [
-        "src/**/*",
-        "Cargo.toml",
-        "Cargo.lock"
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/Cargo.toml",
+        "{projectRoot}/Cargo.lock"
       ],
-      "outputs": ["target/**/*"]
+      "outputs": ["{workspaceRoot}/cel-typescript.*.node"]
     },
     "build:ts": {
       "cache": true,
       "inputs": [
-        "src/**/*.ts",
-        "tsconfig.json",
-        "package.json"
+        "{projectRoot}/src/**/*.ts",
+        "{projectRoot}/tsconfig.json",
+        "{workspaceRoot}/package.json"
       ],
-      "outputs": ["dist/**/*"]
+      "outputs": ["{workspaceRoot}/dist/**/*"]
     },
     "test": {
       "cache": true,
       "inputs": [
-        "__tests__/**/*",
-        "src/**/*",
-        "vitest.config.ts",
+        "{projectRoot}/__tests__/**/*",
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/vitest.config.ts",
+        "{projectRoot}/Cargo.toml",
+        "{projectRoot}/build.rs",
         "{workspaceRoot}/package.json"
       ]
     },
     "format": {
       "cache": true,
       "inputs": [
-        "**/*.{ts,tsx,js,jsx,json,md}",
-        "biome.json"
+        "{projectRoot}/**/*.{ts,tsx,js,jsx,json,md}",
+        "{projectRoot}/biome.json"
       ]
     },
     "lint": {
       "cache": true,
       "inputs": [
-        "**/*.{ts,tsx,js,jsx}",
-        "biome.json"
+        "{projectRoot}/**/*.{ts,tsx,js,jsx}",
+        "{projectRoot}/biome.json"
       ]
     }
   },

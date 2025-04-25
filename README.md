@@ -19,6 +19,16 @@ This project consists of three main components:
 
 3. **TypeScript Wrapper**: A TypeScript API that provides a clean interface to the native module, handling type conversions and providing a more idiomatic JavaScript experience.
 
+## Native Module Structure
+
+The native module is built using NAPI-RS and follows its naming convention:
+
+- Platform-specific builds are named `cel-typescript.<platform>-<arch>.node` (e.g., `cel-typescript.darwin-arm64.node` for Apple Silicon Macs)
+- During build and installation, NAPI-RS automatically creates an `index.node` symlink pointing to the appropriate platform-specific build
+- This structure allows for cross-platform distribution while maintaining platform-specific optimizations
+- The symlink is managed by NAPI-RS and will be different for each contributor based on their platform
+
+
 ## How it Works
 
 When you build this project:
