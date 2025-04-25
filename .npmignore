@@ -1,0 +1,18 @@
+# Development files
+.github/
+.git/
+cel-rust/
+__tests__/
+src/
+build.rs
+Cargo.toml
+biome.json
+nx.json
+project.json
+tsconfig.json
+vitest.config.ts
+
+# Build artifacts
+target/
+dist/
+*.tgz
