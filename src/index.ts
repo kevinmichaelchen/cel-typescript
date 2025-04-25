@@ -12,8 +12,8 @@ export class CelProgram {
 
   static async compile(source: string): Promise<CelProgram> {
     if (!CelProgram.nativeModule) {
-      // Use require instead of import for native modules
-      const nativeBinding = require("../cel-typescript.darwin-arm64.node");
+      // Use the NAPI-RS generated loader which handles platform detection
+      const nativeBinding = await import("../index.js");
       CelProgram.nativeModule = nativeBinding.CelProgram;
       console.log("Imported native CelProgram:", CelProgram.nativeModule);
     }

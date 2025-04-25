@@ -11,10 +11,7 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "allowJs": true,
-        "baseUrl": ".",
-        "paths": {
-            "#native": ["./cel-typescript.darwin-arm64.node"]
-        }
+        "baseUrl": "."
     },
     "include": ["src/**/*", "__tests__/**/*"],
     "exclude": ["node_modules", "dist"]

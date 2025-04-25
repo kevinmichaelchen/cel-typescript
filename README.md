@@ -21,12 +21,13 @@ This project consists of three main components:
 
 ## Native Module Structure
 
-The native module is built using NAPI-RS and follows its naming convention:
+The native module is built using NAPI-RS and provides cross-platform support:
 
 - Platform-specific builds are named `cel-typescript.<platform>-<arch>.node` (e.g., `cel-typescript.darwin-arm64.node` for Apple Silicon Macs)
-- During build and installation, NAPI-RS automatically creates an `index.node` symlink pointing to the appropriate platform-specific build
-- This structure allows for cross-platform distribution while maintaining platform-specific optimizations
-- The symlink is managed by NAPI-RS and will be different for each contributor based on their platform
+- NAPI-RS generates a platform-agnostic loader (`index.js`) that automatically detects the current platform and loads the appropriate `.node` file
+- The module interface is defined in `src/binding.d.ts` which declares the types for the native module
+- At runtime, the TypeScript wrapper (`src/index.ts`) uses the NAPI-RS loader to dynamically load the correct native module
+- This structure allows for seamless cross-platform distribution while maintaining platform-specific optimizations
 
 
 ## How it Works
