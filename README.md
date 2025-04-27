@@ -147,12 +147,13 @@ The native module is built using NAPI-RS and provides cross-platform support:
 
 - Platform-specific builds are named `cel-typescript.<platform>-<arch>.node`
   (e.g., `cel-typescript.darwin-arm64.node` for Apple Silicon Macs)
-- NAPI-RS generates a platform-agnostic loader (`index.js`) that automatically
-  detects the current platform and loads the appropriate `.node` file
-- The module interface is defined in `src/binding.d.ts` which declares the types
-  for the native module
-- At runtime, the TypeScript wrapper (`src/index.ts`) uses the NAPI-RS loader to
-  dynamically load the correct native module
+- NAPI-RS generates a platform-agnostic loader ([`index.js`](./index.js)) that
+  automatically detects the current platform and loads the appropriate `.node`
+  file
+- The module interface is defined in [`index.d.ts`](./index.d.ts) which declares
+  the types for the native module
+- At runtime, the TypeScript wrapper ([`src/index.ts`](./src/index.ts)) uses the
+  NAPI-RS loader to dynamically load the correct native module
 - This structure allows for seamless cross-platform distribution while
   maintaining platform-specific optimizations
 
@@ -194,16 +195,19 @@ webpack or Rollup can exclude the unused code.
 
 When you build this project:
 
-1. The Rust code in `src/lib.rs` is compiled into a native Node.js addon
-   (`.node` file) using NAPI-RS
-2. The TypeScript code in `src/index.ts` is compiled to JavaScript
+1. The Rust code in [`src/lib.rs`](./src/lib.rs) is compiled into a native
+   Node.js addon (`.node` file) using NAPI-RS
+2. The TypeScript code in [`src/index.ts`](./src/index.ts) is compiled to
+   JavaScript
 3. The native module is loaded by Node.js when you import the package
 
 The build process creates several important files:
 
 - `.node` file: The compiled native module containing the Rust code
-- `index.js`: The compiled JavaScript wrapper around the native module
-- `index.d.ts`: TypeScript type definitions generated from the Rust code
+- [`index.js`](./index.js): The compiled JavaScript wrapper around the native
+  module
+- [`index.d.ts`](./index.d.ts): TypeScript type definitions generated from the
+  Rust code
 
 ## Contributing
 
