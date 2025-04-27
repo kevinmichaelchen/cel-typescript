@@ -57,18 +57,7 @@ jobs:
               npm install &&
               npx @napi-rs/cli build --target aarch64-unknown-linux-gnu &&
               aarch64-unknown-linux-gnu-strip *.node
-          - host: ubuntu-latest
-            target: aarch64-linux-android
-            build: |
-              npm install
-              npx @napi-rs/cli build --target aarch64-linux-android
-              ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip *.node
-          - host: ubuntu-latest
-            target: armv7-linux-androideabi
-            build: |
-              npm install
-              npx @napi-rs/cli build --target armv7-linux-androideabi
-              ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip *.node
+
 
     name: stable - ${{ matrix.settings.target }} - node@18
     runs-on: ${{ matrix.settings.host }}
@@ -204,20 +193,7 @@ jobs:
               name: macOS ARM64
               runner: macos-latest
               target: aarch64-apple-darwin
-          - if: startsWith(github.ref, 'refs/tags/v')
-            node: 18
-            platform:
-              name: Android ARM64
-              runner: ubuntu-latest
-              target: aarch64-linux-android
-              android: true
-          - if: startsWith(github.ref, 'refs/tags/v')
-            node: 18
-            platform:
-              name: Android ARM v7
-              runner: ubuntu-latest
-              target: armv7-linux-androideabi
-              android: true
+
     runs-on: ${{ matrix.platform.runner }}
 
     steps:
@@ -360,8 +336,10 @@ jobs:
           ls -la
           echo "\nNode files:"
           find . -maxdepth 1 -name '*.node'
-          find . -name "*.node"
         shell: bash
+
+      - name: Link local package
+        run: npm link
 
       - name: Build TypeScript
         run: npm run build:ts

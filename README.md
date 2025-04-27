@@ -21,6 +21,7 @@ npm install cel-typescript
 ```
 
 **Requirements:**
+
 - Node.js 18 or later
 
 This package includes pre-compiled native binaries for multiple platforms:
@@ -28,7 +29,6 @@ This package includes pre-compiled native binaries for multiple platforms:
 - macOS (x64, arm64)
 - Linux (x64, arm64)
 - Windows (x64)
-- Android (arm64, armv7)
 
 The appropriate binary for your platform will be automatically loaded at
 runtime.
@@ -155,6 +155,40 @@ The native module is built using NAPI-RS and provides cross-platform support:
   dynamically load the correct native module
 - This structure allows for seamless cross-platform distribution while
   maintaining platform-specific optimizations
+
+### Package Size and Platform Support
+
+The npm package is relatively large (~37 MB unpacked) because it includes
+pre-compiled native binaries for all supported platforms:
+
+- macOS (x64, arm64)
+- Linux (x64, arm64)
+- Windows (x64)
+
+However, when you install this package, npm will only extract the `.node` file
+for your platform. For example:
+
+- On an M1/M2 Mac, only `cel-typescript.darwin-arm64.node` (~7.4 MB) is used
+- On Windows, only `cel-typescript.win32-x64.node` is used
+- On Linux, only `cel-typescript.linux-x64.node` or
+  `cel-typescript.linux-arm64.node` is used
+
+This is a common pattern for packages with native bindings. For comparison:
+
+- `sharp` (image processing): 39.7 MB unpacked
+- `better-sqlite3`: 12.8 MB unpacked
+- `canvas`: 8.9 MB unpacked
+
+#### A Note on Tree-Shaking
+
+Tree-shaking (dead code elimination) primarily works with JavaScript modules and
+doesn't affect native binaries. The `.node` files are loaded dynamically at
+runtime based on the platform, so tree-shaking can't eliminate unused platform
+binaries during build time.
+
+However, the JavaScript/TypeScript portion of this package is tree-shakeable.
+For example, if you only use `evaluate()` and not `CelProgram`, a bundler like
+webpack or Rollup can exclude the unused code.
 
 ### How it Works
 
