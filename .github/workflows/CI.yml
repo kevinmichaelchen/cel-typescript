@@ -1,4 +1,4 @@
-name: CI
+name: 🚀 CI
 env:
   DEBUG: napi:*
   APP_NAME: cel-typescript
@@ -14,6 +14,7 @@ on:
 
 jobs:
   build:
+    name: 🔨 Build
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     strategy:
       fail-fast: false
@@ -27,7 +28,7 @@ jobs:
               strip -x *.node
 
 
-    name: stable - ${{ matrix.settings.target }} - node@18
+    name: 🛠️ stable - ${{ matrix.settings.target }} - node@18
     runs-on: ${{ matrix.settings.host }}
 
     steps:
@@ -58,7 +59,7 @@ jobs:
         with:
           targets: ${{ matrix.settings.target }}
 
-      - name: Cache cargo
+      - name: 💾 Cache cargo
         uses: actions/cache@v4
         with:
           path: |
@@ -74,7 +75,7 @@ jobs:
         with:
           version: 0.11.0
 
-      - name: Setup toolchain
+      - name: 🔧 Setup toolchain
         if: ${{ matrix.settings.docker }}
         uses: actions-rs/toolchain@v1
         with:
@@ -91,7 +92,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build in docker
+      - name: 🐳 Build in docker
         uses: addnab/docker-run-action@v3
         if: ${{ matrix.settings.docker }}
         with:
@@ -104,7 +105,7 @@ jobs:
         run: ${{ matrix.settings.build }}
         shell: bash
 
-      - name: Debug - List files after build
+      - name: 🔍 Debug - List files after build
         run: |
           echo "Current directory:"
           pwd
@@ -114,7 +115,7 @@ jobs:
           find . -name "*.node"
         shell: bash
 
-      - name: Upload artifact
+      - name: 📤 Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: bindings-${{ matrix.settings.target }}
@@ -125,7 +126,7 @@ jobs:
           retention-days: 1
 
   test:
-    name: Test ${{ matrix.platform.name }} - node@${{ matrix.node }}
+    name: 🧪 Test ${{ matrix.platform.name }} - node@${{ matrix.node }}
     needs:
       - build
     strategy:
@@ -153,7 +154,7 @@ jobs:
           check-latest: true
           cache: npm
 
-      - name: Cache dependencies
+      - name: 💾 Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
@@ -171,20 +172,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Setup QEMU
+      - name: 🖥️ Setup QEMU
         if: matrix.platform.qemu
         uses: docker/setup-qemu-action@v3
         with:
           platforms: ${{ matrix.platform.qemu }}
 
-      - name: Install Android NDK
+      - name: 📱 Install Android NDK
         if: matrix.platform.android
         run: |
           wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
           unzip android-ndk-r25c-linux.zip
           echo "ANDROID_NDK_HOME=$PWD/android-ndk-r25c" >> $GITHUB_ENV
 
-      - name: Download artifacts
+      - name: 📥 Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: bindings-${{ matrix.platform.target }}
@@ -281,7 +282,7 @@ jobs:
           npm pack --dry-run
 
   publish:
-    name: ${{ github.event_name == 'pull_request' && 'Publish (Dry Run)' || 'Publish' }}
+    name: ${{ github.event_name == 'pull_request' && '🔍 Publish (Dry Run)' || '📦 Publish' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -350,17 +351,17 @@ jobs:
           echo "Package contents:"
           npm pack --dry-run
 
-      - name: Configure npm
+      - name: ⚙️ Configure npm
         if: github.event_name != 'pull_request'
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
-      - name: Publish
+      - name: 🚀 Publish
         if: github.event_name != 'pull_request' && env.NPM_TOKEN != ''
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --provenance
 
-      - name: Dry Run Publish
+      - name: 🔍 Dry Run Publish
         if: github.event_name == 'pull_request'
         run: npm publish --dry-run
