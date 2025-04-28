@@ -13,12 +13,7 @@
     "url": "https://github.com/kevinmichaelchen/cel-typescript/issues"
   },
   "homepage": "https://github.com/kevinmichaelchen/cel-typescript#readme",
-  "files": [
-    "dist/**/*",
-    "*.node",
-    "index.js",
-    "index.d.ts"
-  ],
+  "files": ["dist/**/*", "*.node", "index.js", "index.d.ts"],
   "keywords": [
     "cel",
     "common-expression-language",
