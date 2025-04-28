@@ -21,10 +21,10 @@ jobs:
       matrix:
         settings:
           - host: macos-latest
-            target: darwin-arm64
+            target: aarch64-apple-darwin
             build: |
               npm install
-              npx @napi-rs/cli build --platform darwin-arm64
+              npx @napi-rs/cli build --platform aarch64-apple-darwin
               echo "Binary after build:"
               ls -la *.node
               strip -x *.node
@@ -138,7 +138,7 @@ jobs:
         platform:
           - name: macOS ARM64
             runner: macos-latest
-            target: darwin-arm64
+            target: aarch64-apple-darwin
 
     runs-on: ${{ matrix.platform.runner }}
 
