@@ -32,7 +32,6 @@
     },
     "./native": {
       "import": "./esm/wrapper.js",
-      "require": "./index.js",
       "types": "./index.d.ts"
     }
   },

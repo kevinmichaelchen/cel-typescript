@@ -1,6 +1,3 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 npx nx run cel-typescript:format:check
 npx nx run cel-typescript:check
 npx nx run cel-typescript:lint

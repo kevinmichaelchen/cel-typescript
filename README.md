@@ -129,12 +129,11 @@ This project consists of three main components:
 
 3. **TypeScript Wrapper**: A TypeScript API that provides a clean interface to
    the native module, handling type conversions and providing a more idiomatic
-   JavaScript experience. The [dual-package] setup ensures seamless
-   compatibility with both ESM and CommonJS consumers, allowing the library to
-   be used in modern and legacy Node.js environments alike.
+   JavaScript experience.
 
-[dual-package]:
-  https://nodejs.org/api/packages.html#dual-commonjses-module-packages
+> [!NOTE]
+>
+> Only ESM is supported by this package.
 
 ### Native Module Structure
 
