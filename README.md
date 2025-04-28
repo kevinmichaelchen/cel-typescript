@@ -17,7 +17,7 @@ business rule evaluation.
 ## Installation
 
 ```bash
-npm install cel-typescript
+npm install @kevinmichaelchen/cel-typescript
 ```
 
 **Requirements:**
@@ -46,7 +46,7 @@ There are two ways to use CEL expressions in your code:
 For simple use cases where you evaluate an expression once:
 
 ```typescript
-import { evaluate } from "cel-typescript";
+import { evaluate } from "@kevinmichaelchen/cel-typescript";
 
 // Basic string and numeric operations
 await evaluate(
@@ -72,7 +72,7 @@ For better performance when evaluating the same expression multiple times with
 different contexts:
 
 ```typescript
-import { CelProgram } from "cel-typescript";
+import { CelProgram } from "@kevinmichaelchen/cel-typescript";
 
 // Compile the expression once
 const program = await CelProgram.compile(
