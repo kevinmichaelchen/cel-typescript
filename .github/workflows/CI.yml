@@ -55,7 +55,6 @@ jobs:
 
       - name: Install Zig
         uses: mlugg/setup-zig@v1
-        if: ${{ contains(matrix.target, 'aarch64') }}
 
       - name: Cache NPM dependencies
         uses: actions/cache@v4
