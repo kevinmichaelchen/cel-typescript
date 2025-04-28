@@ -5,7 +5,7 @@
   },
   "files": {
     "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.json"],
-    "ignore": ["index.js", "index.d.ts", "dist/**/*"]
+    "ignore": [".nx", "index.js", "index.d.ts", "dist/**/*"]
   },
   "formatter": {
     "enabled": true,
