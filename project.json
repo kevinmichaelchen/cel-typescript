@@ -5,7 +5,7 @@
     "build:native": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx @napi-rs/cli build --platform --target {args.target} --release ${USE_ZIG:+--zig}"
+        "command": "bash scripts/build.sh {args.target}"
       },
       "outputs": [
         "{workspaceRoot}/cel-typescript.darwin-arm64.node",
