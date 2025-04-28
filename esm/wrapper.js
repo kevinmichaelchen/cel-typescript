@@ -1,6 +1,4 @@
-import { createRequire } from "node:module";
-const require = createRequire(import.meta.url);
-const nativeModule = require("../index.js");
-export default nativeModule;
-// Re-export all named exports
-export * from "../index.js";
+import * as native from "../index.js";
+export const CelProgram = native.CelProgram;
+export const evaluate = native.evaluate;
+export default native;

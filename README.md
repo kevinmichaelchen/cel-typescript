@@ -1,21 +1,19 @@
 # cel-typescript
 
 A TypeScript binding for the Common Expression Language (CEL) using
-[cel-rust][cel-rust]. This project provides a
-Node.js native module that allows you to use CEL in your TypeScript/JavaScript
-projects.
+[cel-rust][cel-rust]. This project provides a Node.js native module that allows
+you to use CEL in your TypeScript/JavaScript projects.
 
 [cel-spec]: https://github.com/google/cel-spec
 [cel-rust]: https://github.com/clarkmcc/cel-rust
 
 ## What is CEL?
 
-[Common Expression Language (CEL)][cel-spec] is an
-expression language created by Google that implements common semantics for
-expression evaluation. It's a simple language for expressing boolean conditions,
-calculations, and variable substitutions. CEL is used in various Google products
-and open-source projects for policy enforcement, configuration validation, and
-business rule evaluation.
+[Common Expression Language (CEL)][cel-spec] is an expression language created
+by Google that implements common semantics for expression evaluation. It's a
+simple language for expressing boolean conditions, calculations, and variable
+substitutions. CEL is used in various Google products and open-source projects
+for policy enforcement, configuration validation, and business rule evaluation.
 
 ## Installation
 
@@ -131,7 +129,12 @@ This project consists of three main components:
 
 3. **TypeScript Wrapper**: A TypeScript API that provides a clean interface to
    the native module, handling type conversions and providing a more idiomatic
-   JavaScript experience.
+   JavaScript experience. The [dual-package] setup ensures seamless
+   compatibility with both ESM and CommonJS consumers, allowing the library to
+   be used in modern and legacy Node.js environments alike.
+
+[dual-package]:
+  https://nodejs.org/api/packages.html#dual-commonjses-module-packages
 
 ### Native Module Structure
 
