@@ -5,7 +5,7 @@
     "build:native": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx @napi-rs/cli build --platform --release"
+        "command": "npx @napi-rs/cli build --target {args.target} --release"
       },
       "outputs": [
         "{workspaceRoot}/cel-typescript.darwin-arm64.node",

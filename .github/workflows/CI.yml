@@ -74,7 +74,7 @@ jobs:
         shell: bash
 
       - name: Build
-        run: npx nx build:native -- --platform ${{ matrix.target }}
+        run: npx nx build:native -- --target ${{ matrix.target }}
         shell: bash
 
       - name: Upload artifact
