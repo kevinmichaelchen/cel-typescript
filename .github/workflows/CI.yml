@@ -1,8 +1,8 @@
-name: 🚀 CI
+name: CI
 env:
   DEBUG: napi:*
-  APP_NAME: cel-typescript
   MACOSX_DEPLOYMENT_TARGET: '10.13'
+  RUST_BACKTRACE: 1
 
 on:
   push:
@@ -14,23 +14,18 @@ on:
 
 jobs:
   build:
-    name: 🔨 Build - ${{ matrix.settings.target }} - node@18
+    name: Build - ${{ matrix.target }}
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     strategy:
       fail-fast: false
       matrix:
-        settings:
-          - host: macos-latest
-            target: aarch64-apple-darwin
-            build: |
-              npm install
-              npx @napi-rs/cli build --platform aarch64-apple-darwin
-              echo "Binary after build:"
-              ls -la *.node
-              strip -x *.node
-              echo "Binary after strip:"
-              ls -la *.node
-    runs-on: ${{ matrix.settings.host }}
+        target: [aarch64-apple-darwin, x86_64-unknown-linux-gnu]
+        include:
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -38,96 +33,55 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Debug - List submodules
-        run: |
-          git submodule status
-          ls -la
-          ls -la cel-rust/
-          ls -la cel-rust/interpreter/
-        shell: bash
-
       - name: Setup node
         uses: actions/setup-node@v4
-        if: ${{ !matrix.settings.docker }}
         with:
           node-version: 18
-          check-latest: true
           cache: npm
 
-      - name: Install
+      - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-        if: ${{ !matrix.settings.docker }}
         with:
-          targets: ${{ matrix.settings.target }}
+          toolchain: stable
+          targets: ${{ matrix.target }}
 
-      - name: 💾 Cache cargo
+      - name: Cache NPM dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: npm-cache-${{ matrix.target }}-node@18-${{ hashFiles('package-lock.json') }}
+
+      - name: Cache Rust dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            .cargo-cache
             target/
-          key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}
-
-      - uses: goto-bus-stop/setup-zig@v2
-        if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' }}
-        with:
-          version: 0.11.0
-
-      - name: 🔧 Setup toolchain
-        if: ${{ matrix.settings.docker }}
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: ${{ matrix.settings.target }}
-          override: true
-
-      - name: Cache NPM dependencies
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: npm-cache-${{ matrix.settings.target }}-${{ hashFiles('package-lock.json') }}
+          key: rust-cache-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: 🐳 Build in docker
-        uses: addnab/docker-run-action@v3
-        if: ${{ matrix.settings.docker }}
-        with:
-          image: ${{ matrix.settings.docker }}
-          options: --user 0:0 -v ${{ github.workspace }}/.cargo-cache/git/db:/usr/local/cargo/git/db -v ${{ github.workspace }}/.cargo/registry/cache:/usr/local/cargo/registry/cache -v ${{ github.workspace }}/.cargo/registry/index:/usr/local/cargo/registry/index -v ${{ github.workspace }}:/build -w /build
-          run: ${{ matrix.settings.build }}
+        run: npm install
+        shell: bash
 
       - name: Build
-        if: ${{ !matrix.settings.docker }}
-        run: ${{ matrix.settings.build }}
+        run: npx nx build:native -- --platform ${{ matrix.target }}
         shell: bash
 
-      - name: 🔍 Debug - List files after build
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "\nFiles in current directory:"
-          ls -la
-          echo "\nNode files:"
-          find . -name "*.node"
-        shell: bash
-
-      - name: 📤 Upload artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bindings-${{ matrix.settings.target }}
+          name: bindings-${{ matrix.target }}
           path: |
-            *.node
+            **/*.node
+            !node_modules/**/*.node
             !target/**/*.node
           if-no-files-found: error
           retention-days: 1
 
   test:
-    name: 🧪 Test ${{ matrix.platform.name }} - node@${{ matrix.node }}
+    name: Test ${{ matrix.platform.name }} - node@${{ matrix.node }}
     needs:
       - build
     strategy:
@@ -171,58 +125,15 @@ jobs:
             ${{ hashFiles('package-lock.json', '**/Cargo.lock') }}
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: 🖥️ Setup QEMU
-        if: matrix.platform.qemu
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: ${{ matrix.platform.qemu }}
-
-      - name: 📱 Install Android NDK
-        if: matrix.platform.android
-        run: |
-          wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
-          unzip android-ndk-r25c-linux.zip
-          echo "ANDROID_NDK_HOME=$PWD/android-ndk-r25c" >> $GITHUB_ENV
-
-      - name: 📥 Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: bindings-${{ matrix.platform.target }}
-          path: .
+          name: bindings-${{ matrix.target }}
 
-      - name: List files
-        run: ls -R .
-        shell: bash
+      - name: Install dependencies
+        run: npm install
 
-      - name: Test bindings (native)
-        if: "!matrix.platform.docker"
+      - name: Test
         run: npm test
-
-      - name: Test bindings (Docker)
-        if: matrix.platform.docker
-        run: |
-          docker run --rm ${{ matrix.platform.qemu && format('--platform linux/{0}', matrix.platform.qemu) || '' }} \
-            -v $(pwd):/build -w /build node:${{ matrix.node }}-slim bash -c '
-              # Install Rust
-              apt-get update && apt-get install -y curl build-essential
-              curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-              export PATH="/root/.cargo/bin:$PATH"
-
-              # Fix npm optional dependencies on ARM64
-              if [[ "${{ matrix.platform.target }}" == *"aarch64"* ]]; then
-                # Ensure clean state
-                rm -rf node_modules
-                # Install dependencies with --no-optional to skip problematic deps
-                npm install --no-optional
-                # Now install only the required optional deps
-                npm install @rollup/rollup-linux-arm64-gnu
-              fi
-
-              # Run tests
-              npm test
-            '
 
   dry-run-publish:
     name: Dry Run Publish
