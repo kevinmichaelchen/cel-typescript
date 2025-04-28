@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: 🔨 Build
+    name: 🔨 Build - ${{ matrix.settings.target }} - node@18
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     strategy:
       fail-fast: false
@@ -26,9 +26,6 @@ jobs:
               npm install
               npx @napi-rs/cli build --target aarch64-apple-darwin
               strip -x *.node
-
-
-    name: 🛠️ stable - ${{ matrix.settings.target }} - node@18
     runs-on: ${{ matrix.settings.host }}
 
     steps:
