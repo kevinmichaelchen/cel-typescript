@@ -55,6 +55,7 @@ jobs:
 
       - name: Install Zig
         uses: mlugg/setup-zig@v1
+        if: ${{ runner.os == 'Linux' }}
 
       - name: Cache NPM dependencies
         uses: actions/cache@v4
@@ -78,6 +79,8 @@ jobs:
 
       - name: Build
         run: npx nx build:native -- --target ${{ matrix.target }}
+        env:
+          USE_ZIG: ${{ runner.os == 'Linux' }}
         shell: bash
 
       - name: Upload artifact
