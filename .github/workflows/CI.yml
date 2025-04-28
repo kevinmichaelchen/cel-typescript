@@ -167,6 +167,23 @@ jobs:
           pattern: bindings-*
           merge-multiple: true
 
+      - name: Move artifacts
+        run: |
+          # Move .node files to root
+          find . -type f -name "*.node" -exec mv {} . \;
+
+          # Count .node files
+          node_count=$(ls -1 *.node 2>/dev/null | wc -l)
+          expected_count=5  # We target 5 platforms
+
+          echo "Found $node_count .node files (expected $expected_count)"
+          ls -la *.node
+
+          if [ "$node_count" -ne "$expected_count" ]; then
+            echo "Error: Expected $expected_count .node files but found $node_count"
+            exit 1
+          fi
+
       - name: Build TypeScript
         run: npm run build:ts
 
@@ -174,6 +191,8 @@ jobs:
         run: |
           echo "Package contents:"
           npm pack --dry-run
+          echo "\nVerifying .node files:"
+          tar -tvf *.tgz | grep "\.node"
 
       - name: Publish
         if: startsWith(github.ref, 'refs/tags/v')
