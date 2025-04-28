@@ -13,18 +13,26 @@ on:
   pull_request:
 
 jobs:
+  # Builds native Node.js bindings for each target platform using napi-rs.
+  # The build artifacts are uploaded and used by the test job.
   build:
     name: Build - ${{ matrix.target }}
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     strategy:
       fail-fast: false
       matrix:
-        target: [aarch64-apple-darwin, x86_64-unknown-linux-gnu]
+        target: [aarch64-apple-darwin, x86_64-apple-darwin, x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-pc-windows-msvc]
         include:
           - target: aarch64-apple-darwin
             os: macos-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -80,6 +88,8 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  # Downloads the built native modules and runs the test suite on each platform
+  # to ensure the bindings work correctly across different architectures.
   test:
     name: Test - ${{ matrix.target }}
     needs:
@@ -87,12 +97,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [aarch64-apple-darwin, x86_64-unknown-linux-gnu]
+        target: [aarch64-apple-darwin, x86_64-apple-darwin, x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-pc-windows-msvc]
         include:
           - target: aarch64-apple-darwin
             os: macos-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -118,70 +134,12 @@ jobs:
       - name: Test
         run: npm test
 
-  dry-run-publish:
-    name: Dry Run Publish
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    needs:
-      - build
-      - test
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          check-latest: true
-          cache: npm
-
-      - name: Cache NPM dependencies
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: npm-cache-ubuntu-latest-${{ hashFiles('package-lock.json') }}
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bindings-aarch64-apple-darwin
-
-      - name: Move artifacts
-        run: |
-          mkdir -p dist
-          find . -type f -name 'cel-typescript.*.node' -exec mv {} . \;
-
-      - name: List files
-        run: |
-          echo "Root directory:"
-          ls -la
-          echo "\nNode files:"
-          find . -maxdepth 1 -name '*.node'
-        shell: bash
-
-      - name: Link local package
-        run: npm link
-
-      - name: Build TypeScript
-        run: npm run build:ts
-
-      - name: Verify package contents
-        run: |
-          echo "Package contents:"
-          npm pack --dry-run
-
+  # Publishes the package to npm when a tag is pushed, or performs a dry-run during PRs.
   publish:
     name: ${{ github.event_name == 'pull_request' && '🔍 Publish (Dry Run)' || '📦 Publish' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
     if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'pull_request'
     needs:
       - build
@@ -193,50 +151,21 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Debug - List submodules
-        run: |
-          git submodule status
-          ls -la
-          ls -la cel-rust/
-          ls -la cel-rust/interpreter/
-        shell: bash
-
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          check-latest: true
           cache: npm
-
-      - name: Cache NPM dependencies
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: npm-cache-ubuntu-latest-${{ hashFiles('package-lock.json') }}
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Download artifact
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: bindings-aarch64-apple-darwin
-
-      - name: Move artifacts
-        run: |
-          mkdir -p dist
-          find . -type f -name 'cel-typescript.*.node' -exec mv {} . \;
-
-      - name: List files
-        run: |
-          echo "Root directory:"
-          ls -la
-          echo "\nNode files:"
-          find . -maxdepth 1 -name '*.node'
-        shell: bash
-
-      - name: Link local package
-        run: npm link
+          pattern: bindings-*
+          merge-multiple: true
 
       - name: Build TypeScript
         run: npm run build:ts
@@ -246,17 +175,12 @@ jobs:
           echo "Package contents:"
           npm pack --dry-run
 
-      - name: ⚙️ Configure npm
-        if: github.event_name != 'pull_request'
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
-      - name: 🚀 Publish
-        if: github.event_name != 'pull_request' && env.NPM_TOKEN != ''
+      - name: Publish
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: npm publish --provenance --access public
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --provenance
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: 🔍 Dry Run Publish
+      - name: Publish (Dry Run)
         if: github.event_name == 'pull_request'
         run: npm publish --dry-run

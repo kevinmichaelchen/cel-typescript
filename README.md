@@ -24,7 +24,10 @@ npm install @kevinmichaelchen/cel-typescript
 
 - Node.js 18 or later
 
-This package currently only includes pre-compiled native binaries for Apple Silicon (M1/M2/M3) Macs. Support for other platforms (Intel Macs, Linux, Windows) is planned for future releases and will be available behind a feature flag.
+This package includes pre-compiled native binaries for the following platforms:
+- macOS (Apple Silicon and Intel)
+- Linux (x86_64 and ARM64)
+- Windows (x86_64)
 
 The appropriate binary for your platform will be automatically loaded at
 runtime.
