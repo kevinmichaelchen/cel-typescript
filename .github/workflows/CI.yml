@@ -169,18 +169,23 @@ jobs:
 
       - name: Move artifacts
         run: |
-          # Move .node files to root
-          find . -type f -name "*.node" -exec mv {} . \;
+          echo "Debug: Showing all downloaded artifacts:"
+          find . -type f -name "*.node" -ls
 
-          # Count .node files
-          node_count=$(ls -1 *.node 2>/dev/null | wc -l)
+          echo "\nMoving only cel-typescript binaries to root:"
+          find . -type f -name "cel-typescript.*.node" -exec mv {} . \;
+
+          echo "\nBinaries in root directory:"
+          ls -la cel-typescript.*.node
+
+          # Count our binaries
+          node_count=$(ls -1 cel-typescript.*.node 2>/dev/null | wc -l)
           expected_count=5  # We target 5 platforms
 
-          echo "Found $node_count .node files (expected $expected_count)"
-          ls -la *.node
-
+          echo "\nFound $node_count cel-typescript binaries (expected $expected_count)"
+          
           if [ "$node_count" -ne "$expected_count" ]; then
-            echo "Error: Expected $expected_count .node files but found $node_count"
+            echo "Error: Expected $expected_count binaries but found $node_count"
             exit 1
           fi
 

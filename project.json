@@ -11,6 +11,7 @@
         "{workspaceRoot}/cel-typescript.darwin-arm64.node",
         "{workspaceRoot}/cel-typescript.darwin-x64.node",
         "{workspaceRoot}/cel-typescript.linux-x64-gnu.node",
+        "{workspaceRoot}/cel-typescript.linux-arm64-gnu.node",
         "{workspaceRoot}/cel-typescript.win32-x64-msvc.node"
       ]
     },
