@@ -81,20 +81,19 @@ jobs:
           retention-days: 1
 
   test:
-    name: Test ${{ matrix.platform.name }} - node@${{ matrix.node }}
+    name: Test - ${{ matrix.target }}
     needs:
       - build
     strategy:
       fail-fast: false
       matrix:
-        node:
-          - 18
-        platform:
-          - name: macOS ARM64
-            runner: macos-latest
-            target: aarch64-apple-darwin
-
-    runs-on: ${{ matrix.platform.runner }}
+        target: [aarch64-apple-darwin, x86_64-unknown-linux-gnu]
+        include:
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -105,26 +104,10 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
-          check-latest: true
+          node-version: 18
           cache: npm
 
-      - name: 💾 Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            .cargo-cache
-            target/
-          key: >
-            deps-${{ matrix.platform.target }}-${{ matrix.node }}-
-            ${{ contains(matrix.platform.target, 'aarch64') && 'npm-install' || 'npm-ci' }}-
-            ${{ hashFiles('package-lock.json', '**/Cargo.lock') }}
-
-      - name: Install dependencies
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: bindings-${{ matrix.target }}
