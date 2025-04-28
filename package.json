@@ -1,6 +1,6 @@
 {
   "name": "@kevinmichaelchen/cel-typescript",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "type": "module",
   "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
   "repository": {
@@ -44,14 +44,9 @@
   "napi": {
     "name": "cel-typescript",
     "triples": {
-      "defaults": true,
+      "defaults": false,
       "additional": [
-        "aarch64-apple-darwin",
-        "aarch64-unknown-linux-gnu",
-        "aarch64-pc-windows-msvc",
-        "x86_64-unknown-linux-gnu",
-        "x86_64-apple-darwin",
-        "x86_64-pc-windows-msvc"
+        "aarch64-apple-darwin"
       ]
     }
   },
