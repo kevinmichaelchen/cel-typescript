@@ -5,12 +5,13 @@
     "build:native": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx @napi-rs/cli build --platform"
+        "command": "bash scripts/build.sh {args.target}"
       },
       "outputs": [
         "{workspaceRoot}/cel-typescript.darwin-arm64.node",
         "{workspaceRoot}/cel-typescript.darwin-x64.node",
         "{workspaceRoot}/cel-typescript.linux-x64-gnu.node",
+        "{workspaceRoot}/cel-typescript.linux-arm64-gnu.node",
         "{workspaceRoot}/cel-typescript.win32-x64-msvc.node"
       ]
     },

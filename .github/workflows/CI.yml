@@ -1,8 +1,8 @@
 name: CI
 env:
   DEBUG: napi:*
-  APP_NAME: cel-typescript
   MACOSX_DEPLOYMENT_TARGET: '10.13'
+  RUST_BACKTRACE: 1
 
 on:
   push:
@@ -13,54 +13,27 @@ on:
   pull_request:
 
 jobs:
+  # Builds native Node.js bindings for each target platform using napi-rs.
+  # The build artifacts are uploaded and used by the test job.
   build:
+    name: Build - ${{ matrix.target }}
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     strategy:
       fail-fast: false
       matrix:
-        settings:
-          - host: macos-latest
-            target: x86_64-apple-darwin
-            build: |
-              npm install
-              npx @napi-rs/cli build --target x86_64-apple-darwin
-              strip -x *.node
-          - host: macos-latest
-            target: aarch64-apple-darwin
-            build: |
-              npm install
-              npx @napi-rs/cli build --target aarch64-apple-darwin
-              strip -x *.node
-          - host: windows-latest
-            target: x86_64-pc-windows-msvc
-            build: |
-              npm install
-              npx @napi-rs/cli build --target x86_64-pc-windows-msvc
-          - host: windows-latest
-            target: aarch64-pc-windows-msvc
-            build: |
-              npm install
-              npx @napi-rs/cli build --target aarch64-pc-windows-msvc
-          - host: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
-            build: |
-              set -e &&
-              npm install &&
-              npx @napi-rs/cli build --target x86_64-unknown-linux-gnu &&
-              strip *.node
-          - host: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
-            build: |
-              set -e &&
-              npm install &&
-              npx @napi-rs/cli build --target aarch64-unknown-linux-gnu &&
-              aarch64-unknown-linux-gnu-strip *.node
-
-
-    name: stable - ${{ matrix.settings.target }} - node@18
-    runs-on: ${{ matrix.settings.host }}
+        target: [aarch64-apple-darwin, x86_64-apple-darwin, x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-pc-windows-msvc]
+        include:
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -68,133 +41,81 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Debug - List submodules
-        run: |
-          git submodule status
-          ls -la
-          ls -la cel-rust/
-          ls -la cel-rust/interpreter/
-        shell: bash
-
       - name: Setup node
         uses: actions/setup-node@v4
-        if: ${{ !matrix.settings.docker }}
         with:
           node-version: 18
-          check-latest: true
           cache: npm
 
-      - name: Install
+      - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-        if: ${{ !matrix.settings.docker }}
-        with:
-          targets: ${{ matrix.settings.target }}
-
-      - name: Cache cargo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            .cargo-cache
-            target/
-          key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}
-
-      - uses: goto-bus-stop/setup-zig@v2
-        if: ${{ matrix.settings.target == 'armv7-unknown-linux-gnueabihf' }}
-        with:
-          version: 0.11.0
-
-      - name: Setup toolchain
-        if: ${{ matrix.settings.docker }}
-        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: ${{ matrix.settings.target }}
-          override: true
+          targets: ${{ matrix.target }}
+
+      - name: Install Zig
+        uses: mlugg/setup-zig@v1
+        if: ${{ runner.os == 'Linux' }}
 
       - name: Cache NPM dependencies
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: npm-cache-${{ matrix.settings.target }}-${{ hashFiles('package-lock.json') }}
+          key: npm-cache-${{ matrix.target }}-node@18-${{ hashFiles('package-lock.json') }}
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: rust-cache-${{ matrix.target }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Build in docker
-        uses: addnab/docker-run-action@v3
-        if: ${{ matrix.settings.docker }}
-        with:
-          image: ${{ matrix.settings.docker }}
-          options: --user 0:0 -v ${{ github.workspace }}/.cargo-cache/git/db:/usr/local/cargo/git/db -v ${{ github.workspace }}/.cargo/registry/cache:/usr/local/cargo/registry/cache -v ${{ github.workspace }}/.cargo/registry/index:/usr/local/cargo/registry/index -v ${{ github.workspace }}:/build -w /build
-          run: ${{ matrix.settings.build }}
-
-      - name: Build
-        if: ${{ !matrix.settings.docker }}
-        run: ${{ matrix.settings.build }}
+        run: npm install
         shell: bash
 
-      - name: Debug - List files after build
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "\nFiles in current directory:"
-          ls -la
-          echo "\nNode files:"
-          find . -name "*.node"
+      - name: Build
+        run: npx nx build:native -- --target ${{ matrix.target }}
+        env:
+          USE_ZIG: ${{ runner.os == 'Linux' }}
         shell: bash
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bindings-${{ matrix.settings.target }}
+          name: bindings-${{ matrix.target }}
           path: |
-            *.node
+            **/*.node
+            !node_modules/**/*.node
             !target/**/*.node
           if-no-files-found: error
           retention-days: 1
 
+  # Downloads the built native modules and runs the test suite on each platform
+  # to ensure the bindings work correctly across different architectures.
   test:
-    name: Test ${{ matrix.platform.name }} - node@${{ matrix.node }}
+    name: Test - ${{ matrix.target }}
     needs:
       - build
     strategy:
       fail-fast: false
       matrix:
-        node:
-          - 18
-          - 20
-        platform:
-          # For non-tag pushes, only test on x64 platforms
-          - name: Linux x64
-            runner: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - name: macOS x64
-            runner: macos-latest
-            target: x86_64-apple-darwin
-          - name: Windows x64
-            runner: windows-latest
-            target: x86_64-pc-windows-msvc
-        # Include all platforms for tags
+        target: [aarch64-apple-darwin, x86_64-apple-darwin, x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-pc-windows-msvc]
         include:
-          - if: startsWith(github.ref, 'refs/tags/v')
-            node: 18
-            platform:
-              name: Linux ARM64
-              runner: ubuntu-latest
-              target: aarch64-unknown-linux-gnu
-              docker: true
-              qemu: arm64
-          - if: startsWith(github.ref, 'refs/tags/v')
-            node: 18
-            platform:
-              name: macOS ARM64
-              runner: macos-latest
-              target: aarch64-apple-darwin
-
-    runs-on: ${{ matrix.platform.runner }}
+          - target: aarch64-apple-darwin
+            os: macos-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -205,86 +126,27 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
-          check-latest: true
+          node-version: 18
           cache: npm
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            .cargo-cache
-            target/
-          key: >
-            deps-${{ matrix.platform.target }}-${{ matrix.node }}-
-            ${{ contains(matrix.platform.target, 'aarch64') && 'npm-install' || 'npm-ci' }}-
-            ${{ hashFiles('package-lock.json', '**/Cargo.lock') }}
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Setup QEMU
-        if: matrix.platform.qemu
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: ${{ matrix.platform.qemu }}
-
-      - name: Install Android NDK
-        if: matrix.platform.android
-        run: |
-          wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
-          unzip android-ndk-r25c-linux.zip
-          echo "ANDROID_NDK_HOME=$PWD/android-ndk-r25c" >> $GITHUB_ENV
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: bindings-${{ matrix.platform.target }}
-          path: .
+          name: bindings-${{ matrix.target }}
 
-      - name: List files
-        run: ls -R .
-        shell: bash
+      - name: Install dependencies
+        run: npm install
 
-      - name: Test bindings (native)
-        if: "!matrix.platform.docker"
+      - name: Test
         run: npm test
 
-      - name: Test bindings (Docker)
-        if: matrix.platform.docker
-        run: |
-          docker run --rm ${{ matrix.platform.qemu && format('--platform linux/{0}', matrix.platform.qemu) || '' }} \
-            -v $(pwd):/build -w /build node:${{ matrix.node }}-slim bash -c '
-              # Install Rust
-              apt-get update && apt-get install -y curl build-essential
-              curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-              export PATH="/root/.cargo/bin:$PATH"
-
-              # Fix npm optional dependencies on ARM64
-              if [[ "${{ matrix.platform.target }}" == *"aarch64"* ]]; then
-                # Ensure clean state
-                rm -rf node_modules
-                # Install dependencies with --no-optional to skip problematic deps
-                npm install --no-optional
-                # Now install only the required optional deps
-                npm install @rollup/rollup-linux-arm64-gnu
-              fi
-
-              # Run tests
-              npm test
-            '
-
+  # Publishes the package to npm when a tag is pushed, or performs a dry-run during PRs.
   publish:
-    name: Publish
+    name: ${{ github.event_name == 'pull_request' && '🔍 Publish (Dry Run)' || '📦 Publish' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'pull_request'
     needs:
       - build
       - test
@@ -295,51 +157,43 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Debug - List submodules
-        run: |
-          git submodule status
-          ls -la
-          ls -la cel-rust/
-          ls -la cel-rust/interpreter/
-        shell: bash
-
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          check-latest: true
           cache: npm
-
-      - name: Cache NPM dependencies
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: npm-cache-ubuntu-latest-${{ hashFiles('package-lock.json') }}
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: bindings-*
-          merge-multiple: false
+          merge-multiple: true
 
       - name: Move artifacts
         run: |
-          mkdir -p dist
-          find . -type f -name '*.node' -exec mv {} . \;
+          echo "Debug: Showing all downloaded artifacts:"
+          find . -type f -name "*.node" -ls
 
-      - name: List files
-        run: |
-          echo "Root directory:"
-          ls -la
-          echo "\nNode files:"
-          find . -maxdepth 1 -name '*.node'
-        shell: bash
+          echo "\nMoving only cel-typescript binaries to root:"
+          find . -type f -name "cel-typescript.*.node" -exec mv {} . \;
 
-      - name: Link local package
-        run: npm link
+          echo "\nBinaries in root directory:"
+          ls -la cel-typescript.*.node
+
+          # Count our binaries
+          node_count=$(ls -1 cel-typescript.*.node 2>/dev/null | wc -l)
+          expected_count=5  # We target 5 platforms
+
+          echo "\nFound $node_count cel-typescript binaries (expected $expected_count)"
+          
+          if [ "$node_count" -ne "$expected_count" ]; then
+            echo "Error: Expected $expected_count binaries but found $node_count"
+            exit 1
+          fi
 
       - name: Build TypeScript
         run: npm run build:ts
@@ -349,12 +203,12 @@ jobs:
           echo "Package contents:"
           npm pack --dry-run
 
-      - name: Configure npm
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
       - name: Publish
-        if: env.NPM_TOKEN != ''
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: npm publish --provenance --access public
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --provenance
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish (Dry Run)
+        if: github.event_name == 'pull_request'
+        run: npm publish --dry-run

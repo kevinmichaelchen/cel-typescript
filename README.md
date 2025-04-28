@@ -1,13 +1,16 @@
 # cel-typescript
 
 A TypeScript binding for the Common Expression Language (CEL) using
-[cel-rust](https://github.com/clarkmcc/cel-rust). This project provides a
+[cel-rust][cel-rust]. This project provides a
 Node.js native module that allows you to use CEL in your TypeScript/JavaScript
 projects.
 
+[cel-spec]: https://github.com/google/cel-spec
+[cel-rust]: https://github.com/clarkmcc/cel-rust
+
 ## What is CEL?
 
-[Common Expression Language (CEL)](https://github.com/google/cel-spec) is an
+[Common Expression Language (CEL)][cel-spec] is an
 expression language created by Google that implements common semantics for
 expression evaluation. It's a simple language for expressing boolean conditions,
 calculations, and variable substitutions. CEL is used in various Google products
@@ -20,18 +23,7 @@ business rule evaluation.
 npm install @kevinmichaelchen/cel-typescript
 ```
 
-**Requirements:**
-
-- Node.js 18 or later
-
-This package includes pre-compiled native binaries for multiple platforms:
-
-- macOS (x64, arm64)
-- Linux (x64, arm64)
-- Windows (x64)
-
-The appropriate binary for your platform will be automatically loaded at
-runtime.
+Node.js 18 or later is required.
 
 ## Usage
 
@@ -169,16 +161,20 @@ pre-compiled native binaries for all supported platforms:
 However, when you install this package, npm will only extract the `.node` file
 for your platform. For example:
 
-- On an M1/M2 Mac, only `cel-typescript.darwin-arm64.node` (~7.4 MB) is used
+- On Apple Silicon, only `cel-typescript.darwin-arm64.node` (~7.4 MB) is used
 - On Windows, only `cel-typescript.win32-x64.node` is used
 - On Linux, only `cel-typescript.linux-x64.node` or
   `cel-typescript.linux-arm64.node` is used
 
-This is a common pattern for packages with native bindings. For comparison:
+This is sometimes a pattern for packages with native bindings. For comparison:
 
-- `sharp` (image processing): 39.7 MB unpacked
-- `better-sqlite3`: 12.8 MB unpacked
-- `canvas`: 8.9 MB unpacked
+- [`better-sqlite3`][better-sqlite3]: 10.2 MB unpacked
+- [`canvas`][canvas]: 408 kB unpacked
+- [`sharp`][sharp]: 522 kB unpacked
+
+[better-sqlite3]: https://www.npmjs.com/package/better-sqlite3
+[canvas]: https://www.npmjs.com/package/canvas
+[sharp]: https://www.npmjs.com/package/sharp
 
 #### A Note on Tree-Shaking
 
