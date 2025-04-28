@@ -31,7 +31,8 @@
       "types": "./dist/src/index.d.ts"
     },
     "./native": {
-      "import": "./index.js",
+      "import": "./esm/wrapper.js",
+      "require": "./index.js",
       "types": "./index.d.ts"
     }
   },
