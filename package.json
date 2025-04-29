@@ -3,7 +3,7 @@
   "version": "0.0.11",
   "type": "module",
   "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
-  "files": ["dist/src/**/*", "*.node", "index.js", "index.d.ts"],
+  "files": ["dist/src/**/*"],
   "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
@@ -12,7 +12,7 @@
     }
   },
   "napi": {
-    "name": "cel-typescript",
+    "name": "@kevinmichaelchen/cel-typescript",
     "triples": {
       "defaults": false,
       "additional": [
