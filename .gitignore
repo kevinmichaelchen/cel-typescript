@@ -1,6 +1,5 @@
 # Rust
 libs/core/target
-libs/core/cel-rust
 
 **/*.rs.bk
 Cargo.lock
