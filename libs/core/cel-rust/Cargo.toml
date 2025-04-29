@@ -1,0 +1,8 @@
+[workspace]
+members = ["parser", "interpreter", "example"]
+resolver = "2"
+
+[profile.bench]
+lto = true
+codegen-units = 1
+opt-level = 3

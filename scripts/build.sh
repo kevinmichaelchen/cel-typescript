@@ -11,10 +11,10 @@ if [ "$USE_ZIG" = "true" ]; then
     --target "$1" \
     
     # The filename and path of the JavaScript binding file
-    --js src/native.cjs \
+    --js libs/core/src/native.cjs \
     
     # TypeScript declaration file
-    --dts src/native.d.ts \
+    --dts libs/core/src/native.d.ts \
     
     # Bypass to cargo build --release
     --release \
@@ -26,8 +26,8 @@ else
   npx @napi-rs/cli build \
     --platform \
     --target "$1" \
-    --js src/native.cjs \
-    --dts src/native.d.ts \
+    --js libs/core/src/native.cjs \
+    --dts libs/core/src/native.d.ts \
     --release
 
 fi

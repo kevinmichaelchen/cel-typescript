@@ -2,15 +2,8 @@
   "name": "@kevinmichaelchen/cel-typescript",
   "version": "0.0.11",
   "type": "module",
+  "private": true,
   "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
-  "files": ["dist/src/**/*"],
-  "types": "./dist/src/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/src/index.js",
-      "types": "./dist/src/index.d.ts"
-    }
-  },
   "napi": {
     "name": "@kevinmichaelchen/cel-typescript",
     "triples": {

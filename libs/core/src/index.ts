@@ -1,3 +1,5 @@
+import { createRequire } from "node:module";
+
 export interface CelContext {
   [key: string]: any;
 }
@@ -33,11 +35,11 @@ class CelProgram {
   static async compile(source: string): Promise<CelProgram> {
     if (!CelProgram.nativeModule) {
       // Use the NAPI-RS generated loader which handles platform detection
-      const nativeBinding = await import(
-        "@kevinmichaelchen/cel-typescript/native"
-      );
+      const require = createRequire(import.meta.url);
+      const nativeBinding = require("./native.cjs");
+
       CelProgram.nativeModule = nativeBinding.CelProgram;
-      console.log("Imported native CelProgram:", CelProgram.nativeModule);
+      console.log("Required native CelProgram:", CelProgram.nativeModule);
     }
     const native = await CelProgram.nativeModule.compile(source);
     return new CelProgram(native);
