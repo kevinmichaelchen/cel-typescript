@@ -129,13 +129,11 @@ jobs:
           node-version: 18
           cache: npm
 
-      - name: Download artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: bindings-${{ matrix.target }}
-
-      - name: Install dependencies
-        run: npm install
+          pattern: bindings-*
+          merge-multiple: true
         
       - name: Copy binaries to src for testing
         run: |
@@ -147,6 +145,9 @@ jobs:
           echo "Files in libs/core/src:"
           find "libs/core/src" -type f -name "*.node" | sort
         shell: bash
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Test
         run: npm test
