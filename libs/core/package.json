@@ -26,6 +26,13 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "optionalDependencies": {
+    "@kevinmichaelchen/cel-typescript-darwin-arm64": "file:../darwin-arm64",
+    "@kevinmichaelchen/cel-typescript-darwin-x64": "file:../darwin-x64",
+    "@kevinmichaelchen/cel-typescript-linux-x64-gnu": "file:../linux-x64-gnu",
+    "@kevinmichaelchen/cel-typescript-linux-arm64-gnu": "file:../linux-arm64-gnu",
+    "@kevinmichaelchen/cel-typescript-win32-x64-msvc": "file:../win32-x64-msvc"
+  },
   "exports": {
     ".": {
       "import": "./dist/src/index.js",

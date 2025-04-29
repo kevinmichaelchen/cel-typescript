@@ -210,6 +210,15 @@ jobs:
             
             # Set the core package version too
             jq ".version = \"$VERSION\"" libs/core/package.json > tmp.json && mv tmp.json libs/core/package.json
+            
+            # Update the optionalDependencies in the core package to use version numbers instead of file paths
+            node -e "const pkg = require('./libs/core/package.json'); \
+              if (pkg.optionalDependencies) { \
+                Object.keys(pkg.optionalDependencies).forEach(dep => { \
+                  pkg.optionalDependencies[dep] = '$VERSION'; \
+                }); \
+                require('fs').writeFileSync('./libs/core/package.json', JSON.stringify(pkg, null, 2)); \
+              }"
           else
             echo "Not a tag push, skipping version update"
           fi
