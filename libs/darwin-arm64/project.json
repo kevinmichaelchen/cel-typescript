@@ -1,0 +1,14 @@
+{
+  "name": "@kevinmichaelchen/cel-typescript-darwin-arm64",
+  "$schema": "node_modules/nx/schemas/project-schema.json",
+  "targets": {
+    "clean": {
+      "cache": false,
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["rm -f {projectRoot}/*.node"],
+        "parallel": false
+      }
+    }
+  }
+}
