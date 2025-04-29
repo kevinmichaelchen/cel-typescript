@@ -7,6 +7,11 @@
       "options": {
         "command": "bash scripts/build.sh {args.target}"
       },
+      "inputs": [
+        "{workspaceRoot}/package.json",
+        "{workspaceRoot}/scripts/build.sh",
+        "{projectRoot}/src/lib.rs"
+      ],
       "outputs": [
         "{workspaceRoot}/cel-typescript.darwin-arm64.node",
         "{workspaceRoot}/cel-typescript.darwin-x64.node",
