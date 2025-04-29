@@ -179,23 +179,49 @@ jobs:
           echo "Debug: Showing all downloaded artifacts:"
           find . -type f -name "*.node" -ls
 
-          echo "\nMoving binaries to their respective package directories:"
+          echo "\nEnsuring binaries exist in their respective package directories:"
           
-          # Copy binaries to their package directories
-          find . -name "cel-typescript.darwin-arm64.node" -exec cp {} libs/darwin-arm64/ \;
-          find . -name "cel-typescript.darwin-x64.node" -exec cp {} libs/darwin-x64/ \;
-          find . -name "cel-typescript.linux-x64-gnu.node" -exec cp {} libs/linux-x64-gnu/ \;
-          find . -name "cel-typescript.linux-arm64-gnu.node" -exec cp {} libs/linux-arm64-gnu/ \;
-          find . -name "cel-typescript.win32-x64-msvc.node" -exec cp {} libs/win32-x64-msvc/ \;
+          # Make sure each package directory has exactly one binary
+          # Copy only if not already present in the target directory
+          if [ ! -f libs/darwin-arm64/cel-typescript.darwin-arm64.node ]; then
+            find . -path "./libs/darwin-arm64" -prune -o -name "cel-typescript.darwin-arm64.node" -exec cp {} libs/darwin-arm64/ \;
+          fi
           
-          # Count our binaries to ensure we have all of them
-          node_count=$(find libs -name "cel-typescript.*.node" | wc -l)
-          expected_count=5  # We target 5 platforms
+          if [ ! -f libs/darwin-x64/cel-typescript.darwin-x64.node ]; then
+            find . -path "./libs/darwin-x64" -prune -o -name "cel-typescript.darwin-x64.node" -exec cp {} libs/darwin-x64/ \;
+          fi
           
-          echo "\nFound $node_count cel-typescript binaries in package directories (expected $expected_count)"
+          if [ ! -f libs/linux-x64-gnu/cel-typescript.linux-x64-gnu.node ]; then
+            find . -path "./libs/linux-x64-gnu" -prune -o -name "cel-typescript.linux-x64-gnu.node" -exec cp {} libs/linux-x64-gnu/ \;
+          fi
           
-          if [ "$node_count" -ne "$expected_count" ]; then
-            echo "Error: Expected $expected_count binaries but found $node_count"
+          if [ ! -f libs/linux-arm64-gnu/cel-typescript.linux-arm64-gnu.node ]; then
+            find . -path "./libs/linux-arm64-gnu" -prune -o -name "cel-typescript.linux-arm64-gnu.node" -exec cp {} libs/linux-arm64-gnu/ \;
+          fi
+          
+          if [ ! -f libs/win32-x64-msvc/cel-typescript.win32-x64-msvc.node ]; then
+            find . -path "./libs/win32-x64-msvc" -prune -o -name "cel-typescript.win32-x64-msvc.node" -exec cp {} libs/win32-x64-msvc/ \;
+          fi
+          
+          # Verify each package directory has exactly one binary
+          darwin_arm64_count=$(find libs/darwin-arm64 -maxdepth 1 -name "cel-typescript.darwin-arm64.node" | wc -l)
+          darwin_x64_count=$(find libs/darwin-x64 -maxdepth 1 -name "cel-typescript.darwin-x64.node" | wc -l)
+          linux_x64_gnu_count=$(find libs/linux-x64-gnu -maxdepth 1 -name "cel-typescript.linux-x64-gnu.node" | wc -l)
+          linux_arm64_gnu_count=$(find libs/linux-arm64-gnu -maxdepth 1 -name "cel-typescript.linux-arm64-gnu.node" | wc -l)
+          win32_x64_msvc_count=$(find libs/win32-x64-msvc -maxdepth 1 -name "cel-typescript.win32-x64-msvc.node" | wc -l)
+          
+          echo "\nVerifying binaries in package directories:"
+          echo "darwin-arm64: $darwin_arm64_count"
+          echo "darwin-x64: $darwin_x64_count"
+          echo "linux-x64-gnu: $linux_x64_gnu_count"
+          echo "linux-arm64-gnu: $linux_arm64_gnu_count"
+          echo "win32-x64-msvc: $win32_x64_msvc_count"
+          
+          # Error if any platform is missing its binary
+          if [ "$darwin_arm64_count" -ne 1 ] || [ "$darwin_x64_count" -ne 1 ] || \
+             [ "$linux_x64_gnu_count" -ne 1 ] || [ "$linux_arm64_gnu_count" -ne 1 ] || \
+             [ "$win32_x64_msvc_count" -ne 1 ]; then
+            echo "Error: Each package directory should have exactly one binary"
             exit 1
           fi
           
