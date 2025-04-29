@@ -137,30 +137,15 @@ jobs:
       - name: Install dependencies
         run: npm install
         
-      - name: Setup platform packages
+      - name: Copy binaries to src for testing
         run: |
-          # Based on the target, determine which platform package we need
-          PLATFORM=""
-          if [[ "${{ matrix.target }}" == "aarch64-apple-darwin" ]]; then
-            PLATFORM="darwin-arm64"
-          elif [[ "${{ matrix.target }}" == "x86_64-apple-darwin" ]]; then
-            PLATFORM="darwin-x64"
-          elif [[ "${{ matrix.target }}" == "x86_64-unknown-linux-gnu" ]]; then
-            PLATFORM="linux-x64-gnu"
-          elif [[ "${{ matrix.target }}" == "aarch64-unknown-linux-gnu" ]]; then
-            PLATFORM="linux-arm64-gnu"
-          elif [[ "${{ matrix.target }}" == "x86_64-pc-windows-msvc" ]]; then
-            PLATFORM="win32-x64-msvc"
-          fi
+          # Copy all .node files found in libs/core to libs/core/src
+          echo "Copying all .node binaries to libs/core/src/"
+          find "libs/core" -maxdepth 1 -name "*.node" -exec cp {} "libs/core/src/" \;
           
-          # Install the platform package locally to make it available for tests
-          if [ -d "libs/$PLATFORM" ]; then
-            echo "Installing platform package: libs/$PLATFORM"
-            npm install --no-save "file:libs/$PLATFORM"
-          else
-            echo "Platform directory libs/$PLATFORM not found"
-            ls -la libs
-          fi
+          # Show what was copied
+          echo "Files in libs/core/src:"
+          find "libs/core/src" -type f -name "*.node" | sort
         shell: bash
 
       - name: Test
