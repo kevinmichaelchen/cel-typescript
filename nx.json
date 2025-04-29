@@ -32,18 +32,28 @@
       ]
     },
     "format": {
-      "cache": true,
-      "inputs": [
-        "{projectRoot}/**/*.{ts,tsx,js,jsx,json,md}",
-        "{projectRoot}/biome.json"
-      ]
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome format --write ."
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome format ."
+      }
     },
     "lint": {
-      "cache": true,
-      "inputs": [
-        "{projectRoot}/**/*.{ts,tsx,js,jsx}",
-        "{projectRoot}/biome.json"
-      ]
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome lint ."
+      }
+    },
+    "check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome check ."
+      }
     }
   },
   "namedInputs": {

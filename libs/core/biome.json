@@ -1,0 +1,8 @@
+{
+  "files": {
+    "ignore": ["artifacts/native.js", "artifacts/native.d.ts"]
+  },
+  "formatter": {
+    "ignore": ["artifacts/native.js", "artifacts/native.d.ts"]
+  }
+}

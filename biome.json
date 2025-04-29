@@ -5,20 +5,13 @@
   },
   "files": {
     "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.json"],
-    "ignore": [
-      ".nx",
-      "artifacts/native.js",
-      "artifacts/native.d.ts",
-      "dist/**/*",
-      "target/**"
-    ]
+    "ignore": [".nx", "**/dist/**/*", "**/target/**"]
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 80,
-    "ignore": ["artifacts/native.js"]
+    "lineWidth": 80
   },
   "linter": {
     "enabled": true,

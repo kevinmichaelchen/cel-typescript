@@ -1,0 +1,48 @@
+{
+  "name": "@kevinmichaelchen/cel-typescript-core",
+  "$schema": "node_modules/nx/schemas/project-schema.json",
+  "targets": {
+    "build:native": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash {projectRoot}/scripts/build.sh {args.target}"
+      },
+      "outputs": [
+        "{projectRoot}/artifacts/cel-typescript.darwin-arm64.node",
+        "{projectRoot}/artifacts/cel-typescript.darwin-x64.node",
+        "{projectRoot}/artifacts/cel-typescript.linux-x64-gnu.node",
+        "{projectRoot}/artifacts/cel-typescript.linux-arm64-gnu.node",
+        "{projectRoot}/artifacts/cel-typescript.win32-x64-msvc.node"
+      ]
+    },
+    "build:ts": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc"
+      },
+      "outputs": ["{projectRoot}/dist/**/*"]
+    },
+    "build": {
+      "executor": "nx:noop",
+      "dependsOn": ["build:native", "build:ts"]
+    },
+    "clean": {
+      "cache": false,
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "rm -rf {projectRoot}/dist",
+          "rm -f {projectRoot}/artifacts/*.node"
+        ],
+        "parallel": false
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run"
+      },
+      "dependsOn": ["build"]
+    }
+  }
+}

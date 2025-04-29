@@ -1,5 +1,10 @@
 #!/bin/bash
 
+set -e
+
+# Change directories to where the script lives
+cd libs/core
+
 mkdir -p artifacts
 
 if [ "$USE_ZIG" = "true" ]; then
@@ -10,7 +15,7 @@ else
     --js artifacts/native.cjs --dts artifacts/native.d.ts
 fi
 
-cp *.node artifacts
+cp @kevinmichaelchen/*.node artifacts
 
 mkdir -p dist/artifacts
 cp -r artifacts/ dist/artifacts
