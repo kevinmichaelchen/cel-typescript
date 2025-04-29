@@ -34,7 +34,10 @@
   },
   "types": "./dist/src/index.d.ts",
   "napi": {
-    "name": "@kevinmichaelchen/cel-typescript",
+    "name": "cel-typescript",
+    "package": {
+      "name": "cel-typescript"
+    },
     "triples": {
       "defaults": false,
       "additional": [

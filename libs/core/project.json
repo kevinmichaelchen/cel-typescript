@@ -34,7 +34,9 @@
       "options": {
         "commands": [
           "rm -rf {projectRoot}/dist",
-          "rm -f {projectRoot}/artifacts/*.node"
+          "rm -f {projectRoot}/*.node",
+          "rm -f {projectRoot}/artifacts/*.node",
+          "rm -rf {projectRoot}/@kevinmichaelchen"
         ],
         "parallel": false
       }
