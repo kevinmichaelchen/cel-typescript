@@ -1,5 +1,6 @@
 # Rust
-/target
+libs/core/target
+
 **/*.rs.bk
 Cargo.lock
 
@@ -37,3 +38,6 @@ coverage/
 .env
 .env.local
 .env.*.local
+
+# Tarballs from testing with `npm pack`
+*.tgz

@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./",
+    "moduleResolution": "nodenext",
+    "module": "NodeNext",
+    "baseUrl": ".",
+    "paths": {
+      "@kevinmichaelchen/cel-typescript-core-darwin-arm64": [
+        "./artifacts/cel-typescript.darwin-arm64.node"
+      ]
+    }
+  },
+  "include": ["src/**/*", "__tests__/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

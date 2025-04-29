@@ -1,3 +1,3 @@
-[submodule "cel-rust"]
-	path = cel-rust
+[submodule "libs/core/cel-rust"]
+	path = libs/core/cel-rust
 	url = https://github.com/clarkmcc/cel-rust.git

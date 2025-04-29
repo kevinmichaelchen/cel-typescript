@@ -1,0 +1,59 @@
+{
+  "name": "@kevinmichaelchen/cel-typescript-core",
+  "version": "0.0.11",
+  "private": true,
+  "type": "module",
+  "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinmichaelchen/cel-typescript.git"
+  },
+  "author": "Kevin Chen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kevinmichaelchen/cel-typescript/issues"
+  },
+  "homepage": "https://github.com/kevinmichaelchen/cel-typescript#readme",
+  "files": ["dist/src/**"],
+  "keywords": [
+    "cel",
+    "common-expression-language",
+    "expression-language",
+    "policy",
+    "rust",
+    "napi-rs"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "optionalDependencies": {
+    "@kevinmichaelchen/cel-typescript-darwin-arm64": "file:../darwin-arm64",
+    "@kevinmichaelchen/cel-typescript-darwin-x64": "file:../darwin-x64",
+    "@kevinmichaelchen/cel-typescript-linux-x64-gnu": "file:../linux-x64-gnu",
+    "@kevinmichaelchen/cel-typescript-linux-arm64-gnu": "file:../linux-arm64-gnu",
+    "@kevinmichaelchen/cel-typescript-win32-x64-msvc": "file:../win32-x64-msvc"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
+    }
+  },
+  "types": "./dist/src/index.d.ts",
+  "napi": {
+    "name": "cel-typescript",
+    "package": {
+      "name": "cel-typescript"
+    },
+    "triples": {
+      "defaults": false,
+      "additional": [
+        "aarch64-apple-darwin",
+        "x86_64-apple-darwin",
+        "x86_64-unknown-linux-gnu",
+        "aarch64-unknown-linux-gnu",
+        "x86_64-pc-windows-msvc"
+      ]
+    }
+  }
+}

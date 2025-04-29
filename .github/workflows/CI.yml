@@ -78,7 +78,7 @@ jobs:
         shell: bash
 
       - name: Build
-        run: npx nx build:native -- --target ${{ matrix.target }}
+        run: npx nx run @kevinmichaelchen/cel-typescript-core:build:native --target=${{ matrix.target }}
         env:
           USE_ZIG: ${{ runner.os == 'Linux' }}
         shell: bash
@@ -129,10 +129,22 @@ jobs:
           node-version: 18
           cache: npm
 
-      - name: Download artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: bindings-${{ matrix.target }}
+          pattern: bindings-*
+          merge-multiple: true
+        
+      - name: Copy binaries to src for testing
+        run: |
+          # Copy all .node files found in libs/core to libs/core/src
+          echo "Copying all .node binaries to libs/core/src/"
+          find "libs/core" -maxdepth 1 -name "*.node" -exec cp {} "libs/core/src/" \;
+          
+          # Show what was copied
+          echo "Files in libs/core/src:"
+          find "libs/core/src" -type f -name "*.node" | sort
+        shell: bash
 
       - name: Install dependencies
         run: npm install
@@ -174,42 +186,116 @@ jobs:
           pattern: bindings-*
           merge-multiple: true
 
-      - name: Move artifacts
+      - name: Process artifacts and prepare packages
         run: |
           echo "Debug: Showing all downloaded artifacts:"
           find . -type f -name "*.node" -ls
 
-          echo "\nMoving only cel-typescript binaries to root:"
-          find . -type f -name "cel-typescript.*.node" -exec mv {} . \;
-
-          echo "\nBinaries in root directory:"
-          ls -la cel-typescript.*.node
-
-          # Count our binaries
-          node_count=$(ls -1 cel-typescript.*.node 2>/dev/null | wc -l)
-          expected_count=5  # We target 5 platforms
-
-          echo "\nFound $node_count cel-typescript binaries (expected $expected_count)"
+          echo "\nEnsuring binaries exist in their respective package directories:"
           
-          if [ "$node_count" -ne "$expected_count" ]; then
-            echo "Error: Expected $expected_count binaries but found $node_count"
+          # Make sure each package directory has exactly one binary
+          # Copy only if not already present in the target directory
+          if [ ! -f libs/darwin-arm64/cel-typescript.darwin-arm64.node ]; then
+            find . -path "./libs/darwin-arm64" -prune -o -name "cel-typescript.darwin-arm64.node" -exec cp {} libs/darwin-arm64/ \;
+          fi
+          
+          if [ ! -f libs/darwin-x64/cel-typescript.darwin-x64.node ]; then
+            find . -path "./libs/darwin-x64" -prune -o -name "cel-typescript.darwin-x64.node" -exec cp {} libs/darwin-x64/ \;
+          fi
+          
+          if [ ! -f libs/linux-x64-gnu/cel-typescript.linux-x64-gnu.node ]; then
+            find . -path "./libs/linux-x64-gnu" -prune -o -name "cel-typescript.linux-x64-gnu.node" -exec cp {} libs/linux-x64-gnu/ \;
+          fi
+          
+          if [ ! -f libs/linux-arm64-gnu/cel-typescript.linux-arm64-gnu.node ]; then
+            find . -path "./libs/linux-arm64-gnu" -prune -o -name "cel-typescript.linux-arm64-gnu.node" -exec cp {} libs/linux-arm64-gnu/ \;
+          fi
+          
+          if [ ! -f libs/win32-x64-msvc/cel-typescript.win32-x64-msvc.node ]; then
+            find . -path "./libs/win32-x64-msvc" -prune -o -name "cel-typescript.win32-x64-msvc.node" -exec cp {} libs/win32-x64-msvc/ \;
+          fi
+          
+          # Verify each package directory has exactly one binary
+          darwin_arm64_count=$(find libs/darwin-arm64 -maxdepth 1 -name "cel-typescript.darwin-arm64.node" | wc -l)
+          darwin_x64_count=$(find libs/darwin-x64 -maxdepth 1 -name "cel-typescript.darwin-x64.node" | wc -l)
+          linux_x64_gnu_count=$(find libs/linux-x64-gnu -maxdepth 1 -name "cel-typescript.linux-x64-gnu.node" | wc -l)
+          linux_arm64_gnu_count=$(find libs/linux-arm64-gnu -maxdepth 1 -name "cel-typescript.linux-arm64-gnu.node" | wc -l)
+          win32_x64_msvc_count=$(find libs/win32-x64-msvc -maxdepth 1 -name "cel-typescript.win32-x64-msvc.node" | wc -l)
+          
+          echo "\nVerifying binaries in package directories:"
+          echo "darwin-arm64: $darwin_arm64_count"
+          echo "darwin-x64: $darwin_x64_count"
+          echo "linux-x64-gnu: $linux_x64_gnu_count"
+          echo "linux-arm64-gnu: $linux_arm64_gnu_count"
+          echo "win32-x64-msvc: $win32_x64_msvc_count"
+          
+          # Error if any platform is missing its binary
+          if [ "$darwin_arm64_count" -ne 1 ] || [ "$darwin_x64_count" -ne 1 ] || \
+             [ "$linux_x64_gnu_count" -ne 1 ] || [ "$linux_arm64_gnu_count" -ne 1 ] || \
+             [ "$win32_x64_msvc_count" -ne 1 ]; then
+            echo "Error: Each package directory should have exactly one binary"
             exit 1
+          fi
+          
+          # Set version for all packages based on tag
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "Setting version to $VERSION for all packages"
+            
+            for pkg in libs/darwin-arm64 libs/darwin-x64 libs/linux-x64-gnu libs/linux-arm64-gnu libs/win32-x64-msvc; do
+              jq ".version = \"$VERSION\"" $pkg/package.json > tmp.json && mv tmp.json $pkg/package.json
+            done
+            
+            # Set the core package version too
+            jq ".version = \"$VERSION\"" libs/core/package.json > tmp.json && mv tmp.json libs/core/package.json
+            
+            # Update the optionalDependencies in the core package to use version numbers instead of file paths
+            node -e "const pkg = require('./libs/core/package.json'); \
+              if (pkg.optionalDependencies) { \
+                Object.keys(pkg.optionalDependencies).forEach(dep => { \
+                  pkg.optionalDependencies[dep] = '$VERSION'; \
+                }); \
+                require('fs').writeFileSync('./libs/core/package.json', JSON.stringify(pkg, null, 2)); \
+              }"
+          else
+            echo "Not a tag push, skipping version update"
           fi
 
       - name: Build TypeScript
         run: npm run build:ts
 
-      - name: Verify package contents
+      - name: Publish Core Package (Dry Run)
+        if: github.event_name == 'pull_request'
         run: |
-          echo "Package contents:"
+          cd libs/core
           npm pack --dry-run
 
-      - name: Publish
+      - name: Publish Platform Packages (Dry Run)
+        if: github.event_name == 'pull_request'
+        run: |
+          for pkg in darwin-arm64 darwin-x64 linux-x64-gnu linux-arm64-gnu win32-x64-msvc; do
+            echo "\n==== Dry run publishing $pkg package ===="
+            cd libs/$pkg
+            npm pack --dry-run
+            cd ../..
+          done
+
+      - name: Publish Core Package
         if: startsWith(github.ref, 'refs/tags/v')
-        run: npm publish --provenance --access public
+        run: |
+          cd libs/core
+          npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish (Dry Run)
-        if: github.event_name == 'pull_request'
-        run: npm publish --dry-run
+      - name: Publish Platform Packages
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          for pkg in darwin-arm64 darwin-x64 linux-x64-gnu linux-arm64-gnu win32-x64-msvc; do
+            echo "\n==== Publishing $pkg package ===="
+            cd libs/$pkg
+            npm publish --provenance --access public
+            cd ../..
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

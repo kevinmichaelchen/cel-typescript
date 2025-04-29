@@ -1,64 +1,16 @@
 {
   "name": "@kevinmichaelchen/cel-typescript",
   "version": "0.0.11",
-  "type": "module",
-  "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kevinmichaelchen/cel-typescript.git"
-  },
-  "author": "Kevin Chen",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/kevinmichaelchen/cel-typescript/issues"
-  },
-  "homepage": "https://github.com/kevinmichaelchen/cel-typescript#readme",
-  "files": ["dist/**/*", "*.node", "index.js", "index.d.ts"],
-  "keywords": [
-    "cel",
-    "common-expression-language",
-    "expression-language",
-    "policy",
-    "rust",
-    "napi-rs"
-  ],
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "exports": {
-    ".": {
-      "import": "./dist/src/index.js",
-      "types": "./dist/src/index.d.ts"
-    },
-    "./native": {
-      "import": "./esm/wrapper.js",
-      "types": "./index.d.ts"
-    }
-  },
-  "types": "./dist/src/index.d.ts",
-  "napi": {
-    "name": "cel-typescript",
-    "triples": {
-      "defaults": false,
-      "additional": [
-        "aarch64-apple-darwin",
-        "x86_64-apple-darwin",
-        "x86_64-unknown-linux-gnu",
-        "aarch64-unknown-linux-gnu",
-        "x86_64-pc-windows-msvc"
-      ]
-    }
-  },
+  "private": true,
   "scripts": {
-    "build:native": "nx build:native",
-    "build:ts": "nx build:ts",
-    "format": "nx run cel-typescript:format",
-    "format:check": "nx run cel-typescript:format:check",
-    "lint": "nx lint",
+    "build": "nx run-many -t build",
+    "build:native": "nx run-many -t build:native",
+    "build:ts": "nx run-many -t build:ts",
     "check": "nx check",
-    "build": "nx build",
-    "test": "nx test",
-    "clean": "nx clean"
+    "clean": "nx run-many -t clean",
+    "format": "biome format . && biome check . && biome lint .",
+    "format:fix": "biome format --write . && biome check --write . && biome lint .",
+    "test": "nx run-many -t test"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

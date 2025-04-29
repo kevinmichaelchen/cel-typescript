@@ -1,3 +1,1 @@
-npx nx run cel-typescript:format:check
-npx nx run cel-typescript:check
-npx nx run cel-typescript:lint
+npm run format

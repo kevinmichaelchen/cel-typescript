@@ -7,9 +7,7 @@ export default defineConfig({
     environment: "node",
   },
   resolve: {
-    alias: {
-      "#native": "../cel-typescript.darwin-arm64.node",
-    },
+    alias: {},
   },
   assetsInclude: ["**/*.node"],
 });
