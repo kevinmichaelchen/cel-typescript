@@ -3,6 +3,7 @@
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "targets": {
     "build:native": {
+      "cache": false,
       "executor": "nx:run-commands",
       "options": {
         "command": "bash {projectRoot}/scripts/build.sh {args.target}"
@@ -16,9 +17,10 @@
       ]
     },
     "build:ts": {
+      "cache": false,
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc"
+        "command": "tsc -p {projectRoot}/tsconfig.json"
       },
       "outputs": ["{projectRoot}/dist/**/*"]
     },
