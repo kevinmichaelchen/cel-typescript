@@ -9,11 +9,13 @@
         "command": "bash {projectRoot}/scripts/build.sh {args.target}"
       },
       "outputs": [
-        "{projectRoot}/artifacts/cel-typescript.darwin-arm64.node",
-        "{projectRoot}/artifacts/cel-typescript.darwin-x64.node",
-        "{projectRoot}/artifacts/cel-typescript.linux-x64-gnu.node",
-        "{projectRoot}/artifacts/cel-typescript.linux-arm64-gnu.node",
-        "{projectRoot}/artifacts/cel-typescript.win32-x64-msvc.node"
+        "{projectRoot}/cel-typescript.darwin-arm64.node",
+        "{projectRoot}/cel-typescript.darwin-x64.node",
+        "{projectRoot}/cel-typescript.linux-x64-gnu.node",
+        "{projectRoot}/cel-typescript.linux-arm64-gnu.node",
+        "{projectRoot}/cel-typescript.win32-x64-msvc.node",
+        "{projectRoot}/src/native.cjs",
+        "{projectRoot}/src/native.d.ts"
       ]
     },
     "build:ts": {
@@ -35,7 +37,6 @@
         "commands": [
           "rm -rf {projectRoot}/dist",
           "rm -f {projectRoot}/*.node",
-          "rm -f {projectRoot}/artifacts/*.node",
           "rm -rf {projectRoot}/@kevinmichaelchen"
         ],
         "parallel": false
