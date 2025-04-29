@@ -12,4 +12,5 @@ fi
 
 cp *.node artifacts
 
-# TODO cp artifacts to dist
+mkdir -p dist/artifacts
+cp -r artifacts/ dist/artifacts
