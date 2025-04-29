@@ -174,42 +174,81 @@ jobs:
           pattern: bindings-*
           merge-multiple: true
 
-      - name: Move artifacts
+      - name: Process artifacts and prepare packages
         run: |
           echo "Debug: Showing all downloaded artifacts:"
           find . -type f -name "*.node" -ls
 
-          echo "\nMoving only cel-typescript binaries to root:"
-          find . -type f -name "cel-typescript.*.node" -exec mv {} . \;
-
-          echo "\nBinaries in root directory:"
-          ls -la cel-typescript.*.node
-
-          # Count our binaries
-          node_count=$(ls -1 cel-typescript.*.node 2>/dev/null | wc -l)
+          echo "\nMoving binaries to their respective package directories:"
+          
+          # Copy binaries to their package directories
+          find . -name "cel-typescript.darwin-arm64.node" -exec cp {} libs/darwin-arm64/ \;
+          find . -name "cel-typescript.darwin-x64.node" -exec cp {} libs/darwin-x64/ \;
+          find . -name "cel-typescript.linux-x64-gnu.node" -exec cp {} libs/linux-x64-gnu/ \;
+          find . -name "cel-typescript.linux-arm64-gnu.node" -exec cp {} libs/linux-arm64-gnu/ \;
+          find . -name "cel-typescript.win32-x64-msvc.node" -exec cp {} libs/win32-x64-msvc/ \;
+          
+          # Count our binaries to ensure we have all of them
+          node_count=$(find libs -name "cel-typescript.*.node" | wc -l)
           expected_count=5  # We target 5 platforms
-
-          echo "\nFound $node_count cel-typescript binaries (expected $expected_count)"
+          
+          echo "\nFound $node_count cel-typescript binaries in package directories (expected $expected_count)"
           
           if [ "$node_count" -ne "$expected_count" ]; then
             echo "Error: Expected $expected_count binaries but found $node_count"
             exit 1
           fi
+          
+          # Set version for all packages based on tag
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "Setting version to $VERSION for all packages"
+            
+            for pkg in libs/darwin-arm64 libs/darwin-x64 libs/linux-x64-gnu libs/linux-arm64-gnu libs/win32-x64-msvc; do
+              jq ".version = \"$VERSION\"" $pkg/package.json > tmp.json && mv tmp.json $pkg/package.json
+            done
+            
+            # Set the core package version too
+            jq ".version = \"$VERSION\"" libs/core/package.json > tmp.json && mv tmp.json libs/core/package.json
+          else
+            echo "Not a tag push, skipping version update"
+          fi
 
       - name: Build TypeScript
         run: npm run build:ts
 
-      - name: Verify package contents
+      - name: Publish Core Package (Dry Run)
+        if: github.event_name == 'pull_request'
         run: |
-          echo "Package contents:"
+          cd libs/core
           npm pack --dry-run
 
-      - name: Publish
+      - name: Publish Platform Packages (Dry Run)
+        if: github.event_name == 'pull_request'
+        run: |
+          for pkg in darwin-arm64 darwin-x64 linux-x64-gnu linux-arm64-gnu win32-x64-msvc; do
+            echo "\n==== Dry run publishing $pkg package ===="
+            cd libs/$pkg
+            npm pack --dry-run
+            cd ../..
+          done
+
+      - name: Publish Core Package
         if: startsWith(github.ref, 'refs/tags/v')
-        run: npm publish --provenance --access public
+        run: |
+          cd libs/core
+          npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish (Dry Run)
-        if: github.event_name == 'pull_request'
-        run: npm publish --dry-run
+      - name: Publish Platform Packages
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          for pkg in darwin-arm64 darwin-x64 linux-x64-gnu linux-arm64-gnu win32-x64-msvc; do
+            echo "\n==== Publishing $pkg package ===="
+            cd libs/$pkg
+            npm publish --provenance --access public
+            cd ../..
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,12 @@
+{
+  "name": "@kevinmichaelchen/cel-typescript-darwin-x64",
+  "version": "0.0.0",
+  "os": ["darwin"],
+  "cpu": ["x64"],
+  "main": "cel-typescript.darwin-x64.node",
+  "files": ["cel-typescript.darwin-x64.node"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
