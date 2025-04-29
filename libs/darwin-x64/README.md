@@ -1,0 +1,3 @@
+# `@kevinmichaelchen/cel-typescript-darwin-x64`
+
+This is the **x86_64-apple-darwin** binary for `@kevinmichaelchen/cel-typescript`
