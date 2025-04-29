@@ -1,0 +1,63 @@
+{
+  "name": "core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/core/src",
+  "projectType": "library",
+  "targets": {
+    "build:native": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash libs/core/scripts/build.sh"
+      },
+      "cache": false,
+      "inputs": [
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/Cargo.toml",
+        "{projectRoot}/Cargo.lock",
+        "{projectRoot}/package.json"
+      ],
+      "outputs": ["{workspaceRoot}/cel-typescript.node"]
+    },
+    "build:ts": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "options": {
+        "outputPath": "dist/libs/core",
+        "main": "libs/core/src/index.ts",
+        "tsConfig": "libs/core/tsconfig.json",
+        "assets": ["libs/core/*.md"]
+      },
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/src/**/*.ts",
+        "{projectRoot}/tsconfig.json",
+        "{workspaceRoot}/package.json"
+      ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/core/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["coverage/libs/core"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/libs/core"
+      },
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/__tests__/**/*",
+        "{projectRoot}/src/**/*",
+        "{projectRoot}/vitest.config.ts",
+        "{projectRoot}/Cargo.toml",
+        "{projectRoot}/build.rs",
+        "{workspaceRoot}/package.json"
+      ]
+    }
+  },
+  "tags": []
+}

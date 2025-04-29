@@ -11,8 +11,38 @@
       "types": "./dist/src/index.d.ts"
     }
   },
-  "license": "MIT",
+  "napi": {
+    "name": "@kevinmichaelchen/cel-typescript",
+    "triples": {
+      "defaults": false,
+      "additional": [
+        "aarch64-apple-darwin",
+        "x86_64-apple-darwin",
+        "x86_64-unknown-linux-gnu",
+        "aarch64-unknown-linux-gnu",
+        "x86_64-pc-windows-msvc"
+      ]
+    }
+  },
   "engines": {
-    "node": ">= 10"
-  }
+    "node": ">=18.0.0"
+  },
+  "author": "Kevin Chen",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinmichaelchen/cel-typescript.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kevinmichaelchen/cel-typescript/issues"
+  },
+  "homepage": "https://github.com/kevinmichaelchen/cel-typescript#readme",
+  "keywords": [
+    "cel",
+    "common-expression-language",
+    "expression-language",
+    "policy",
+    "rust",
+    "napi-rs"
+  ]
 }

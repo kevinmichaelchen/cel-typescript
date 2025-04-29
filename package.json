@@ -4,21 +4,8 @@
   "type": "module",
   "private": true,
   "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
-  "napi": {
-    "name": "@kevinmichaelchen/cel-typescript",
-    "triples": {
-      "defaults": false,
-      "additional": [
-        "aarch64-apple-darwin",
-        "x86_64-apple-darwin",
-        "x86_64-unknown-linux-gnu",
-        "aarch64-unknown-linux-gnu",
-        "x86_64-pc-windows-msvc"
-      ]
-    }
-  },
   "scripts": {
-    "build:native": "nx build:native",
+    "build:native": "nx run core:build:native",
     "build:ts": "nx build:ts",
     "format": "nx run cel-typescript:format",
     "format:check": "nx run cel-typescript:format:check",

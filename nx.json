@@ -2,15 +2,6 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "main",
   "targetDefaults": {
-    "build:native": {
-      "cache": true,
-      "inputs": [
-        "{projectRoot}/src/**/*",
-        "{projectRoot}/Cargo.toml",
-        "{projectRoot}/Cargo.lock"
-      ],
-      "outputs": ["{workspaceRoot}/cel-typescript.*.node"]
-    },
     "build:ts": {
       "cache": true,
       "inputs": [
