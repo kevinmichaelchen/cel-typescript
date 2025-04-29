@@ -5,7 +5,13 @@
   },
   "files": {
     "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.json"],
-    "ignore": [".nx", "**/dist/**/*", "**/target/**"]
+    "ignore": [
+      ".nx",
+      "**/dist/**/*",
+      "**/target/**",
+      "**/artifacts/native.d.ts",
+      "**/native.d.ts"
+    ]
   },
   "formatter": {
     "enabled": true,
