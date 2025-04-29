@@ -8,11 +8,11 @@
         "command": "bash scripts/build.sh {args.target}"
       },
       "outputs": [
-        "{workspaceRoot}/cel-typescript.darwin-arm64.node",
-        "{workspaceRoot}/cel-typescript.darwin-x64.node",
-        "{workspaceRoot}/cel-typescript.linux-x64-gnu.node",
-        "{workspaceRoot}/cel-typescript.linux-arm64-gnu.node",
-        "{workspaceRoot}/cel-typescript.win32-x64-msvc.node"
+        "{workspaceRoot}/artifacts/cel-typescript.darwin-arm64.node",
+        "{workspaceRoot}/artifacts/cel-typescript.darwin-x64.node",
+        "{workspaceRoot}/artifacts/cel-typescript.linux-x64-gnu.node",
+        "{workspaceRoot}/artifacts/cel-typescript.linux-arm64-gnu.node",
+        "{workspaceRoot}/artifacts/cel-typescript.win32-x64-msvc.node"
       ]
     },
     "build:ts": {
@@ -29,7 +29,7 @@
     "clean": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["rm -rf dist", "rm -f *.node"],
+        "commands": ["rm -rf dist", "rm -f *.node", "rm -f src/*.node"],
         "parallel": false
       }
     },

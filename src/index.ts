@@ -36,7 +36,7 @@ class CelProgram {
     if (!CelProgram.nativeModule) {
       // Use the NAPI-RS generated loader which handles platform detection
       const require = createRequire(import.meta.url);
-      const nativeBinding = require("./native.cjs");
+      const nativeBinding = require("../artifacts/native.cjs");
       CelProgram.nativeModule = nativeBinding.CelProgram;
       console.log("Imported native CelProgram:", CelProgram.nativeModule);
     }

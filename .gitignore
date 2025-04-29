@@ -37,3 +37,6 @@ coverage/
 .env
 .env.local
 .env.*.local
+
+# Tarballs from testing with `npm pack`
+*.tgz
