@@ -3,39 +3,14 @@
   "version": "0.0.11",
   "type": "module",
   "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kevinmichaelchen/cel-typescript.git"
-  },
-  "author": "Kevin Chen",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/kevinmichaelchen/cel-typescript/issues"
-  },
-  "homepage": "https://github.com/kevinmichaelchen/cel-typescript#readme",
-  "files": ["dist/**/*", "*.node", "index.js", "index.d.ts"],
-  "keywords": [
-    "cel",
-    "common-expression-language",
-    "expression-language",
-    "policy",
-    "rust",
-    "napi-rs"
-  ],
-  "engines": {
-    "node": ">=18.0.0"
-  },
+  "files": ["dist/src/**/*", "*.node", "index.js", "index.d.ts"],
+  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/src/index.js",
       "types": "./dist/src/index.d.ts"
-    },
-    "./native": {
-      "import": "./esm/wrapper.js",
-      "types": "./index.d.ts"
     }
   },
-  "types": "./dist/src/index.d.ts",
   "napi": {
     "name": "cel-typescript",
     "triples": {
@@ -60,6 +35,13 @@
     "test": "nx test",
     "clean": "nx clean"
   },
+  "optionalDependencies": {
+    "@kevinmichaelchen/cel-typescript-darwin-arm64": "^0.0.0",
+    "@kevinmichaelchen/cel-typescript-darwin-x64": "^0.0.0",
+    "@kevinmichaelchen/cel-typescript-linux-arm64-gnu": "^0.0.0",
+    "@kevinmichaelchen/cel-typescript-linux-x64-gnu": "^0.0.0",
+    "@kevinmichaelchen/cel-typescript-win32-x64-msvc": "^0.0.0"
+  },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@napi-rs/cli": "^2.18.4",
@@ -73,5 +55,26 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.0.0",
     "vitest": "^3.1.2"
+  },
+  "author": "Kevin Chen",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinmichaelchen/cel-typescript.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kevinmichaelchen/cel-typescript/issues"
+  },
+  "homepage": "https://github.com/kevinmichaelchen/cel-typescript#readme",
+  "keywords": [
+    "cel",
+    "common-expression-language",
+    "expression-language",
+    "policy",
+    "rust",
+    "napi-rs"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
