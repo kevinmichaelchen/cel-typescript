@@ -6,6 +6,10 @@
   "main": "cel-typescript.win32-x64-msvc.node",
   "files": ["cel-typescript.win32-x64-msvc.node"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinmichaelchen/cel-typescript.git"
+  },
   "engines": {
     "node": ">=18.0.0"
   }

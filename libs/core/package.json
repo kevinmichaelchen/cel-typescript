@@ -1,6 +1,6 @@
 {
   "name": "@kevinmichaelchen/cel-typescript-core",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "type": "module",
   "description": "TypeScript bindings for the Common Expression Language (CEL) using cel-rust",
   "repository": {

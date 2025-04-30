@@ -6,6 +6,10 @@
   "main": "cel-typescript.darwin-arm64.node",
   "files": ["cel-typescript.darwin-arm64.node"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinmichaelchen/cel-typescript.git"
+  },
   "engines": {
     "node": ">=18.0.0"
   }
