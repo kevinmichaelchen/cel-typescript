@@ -4,7 +4,7 @@
   "os": ["linux"],
   "cpu": ["x64"],
   "main": "cel-typescript.linux-x64-gnu.node",
-  "files": ["cel-typescript.linux-x64-gnu.node"],
+  "files": ["cel-typescript.linux-x64-gnu.node", "README.md"],
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -4,7 +4,7 @@
   "os": ["darwin"],
   "cpu": ["arm64"],
   "main": "cel-typescript.darwin-arm64.node",
-  "files": ["cel-typescript.darwin-arm64.node"],
+  "files": ["cel-typescript.darwin-arm64.node", "README.md"],
   "license": "MIT",
   "repository": {
     "type": "git",

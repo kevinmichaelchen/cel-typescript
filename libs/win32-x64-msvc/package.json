@@ -4,7 +4,7 @@
   "os": ["win32"],
   "cpu": ["x64"],
   "main": "cel-typescript.win32-x64-msvc.node",
-  "files": ["cel-typescript.win32-x64-msvc.node"],
+  "files": ["cel-typescript.win32-x64-msvc.node", "README.md"],
   "license": "MIT",
   "repository": {
     "type": "git",
