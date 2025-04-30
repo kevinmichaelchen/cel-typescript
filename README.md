@@ -125,8 +125,15 @@ await timeProgram.execute({
 
 ## Alternatives
 
-I am evaluating the underlying `cel-rust` library against some of its peers in
-the JS/TS ecosystem here: https://github.com/kevinmichaelchen/cel-js-evaluation
+The underlying `cel-rust` library — and, by extension, this library — is more
+feature-complete than all of its peers in the JS/TS ecosystem here.
+
+> [!NOTE]
+>
+> See the [cel-js-evaluation][cel-js-evaluation] repository for a comparison of
+> the features provided by this library and its peers.
+
+[cel-js-evaluation]: https://github.com/kevinmichaelchen/cel-js-evaluation
 
 ## Architecture
 
