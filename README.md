@@ -123,6 +123,11 @@ await timeProgram.execute({
 > takes about 0.7ms. The one-step `evaluate()` function takes roughly 2ms as it
 > performs both steps.
 
+## Alternatives
+
+I am evaluating the underlying `cel-rust` library against some of its peers in
+the JS/TS ecosystem here: https://github.com/kevinmichaelchen/cel-js-evaluation
+
 ## Architecture
 
 This project consists of three main components:
