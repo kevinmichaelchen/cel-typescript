@@ -18,10 +18,21 @@ for policy enforcement, configuration validation, and business rule evaluation.
 ## Installation
 
 ```bash
-npm install @kevinmichaelchen/cel-typescript
+npm install @kevinmichaelchen/cel-typescript-core
 ```
 
-Node.js 18 or later is required.
+> [!NOTE]
+>
+> You'll need Node.js 18 or later. You'll also need to install one of several
+> platform-specific packages:
+>
+> | Platform                    | Package                                                                                                                              |
+> | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+> | macOS ARM64 (Apple Silicon) | [`@kevinmichaelchen/cel-typescript-darwin-arm64`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-darwin-arm64)       |
+> | macOS x64 (Intel)           | [`@kevinmichaelchen/cel-typescript-darwin-x64`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-darwin-x64)           |
+> | Linux x64                   | [`@kevinmichaelchen/cel-typescript-linux-x64-gnu`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-linux-x64-gnu)     |
+> | Linux ARM64                 | [`@kevinmichaelchen/cel-typescript-linux-arm64-gnu`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-linux-arm64-gnu) |
+> | Windows x64                 | [`@kevinmichaelchen/cel-typescript-win32-x64-msvc`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-win32-x64-msvc)   |
 
 ## Usage
 
@@ -36,7 +47,7 @@ There are two ways to use CEL expressions in your code:
 For simple use cases where you evaluate an expression once:
 
 ```typescript
-import { evaluate } from "@kevinmichaelchen/cel-typescript";
+import { evaluate } from "@kevinmichaelchen/cel-typescript-core";
 
 // Basic string and numeric operations
 await evaluate(
@@ -62,7 +73,7 @@ For better performance when evaluating the same expression multiple times with
 different contexts:
 
 ```typescript
-import { CelProgram } from "@kevinmichaelchen/cel-typescript";
+import { CelProgram } from "@kevinmichaelchen/cel-typescript-core";
 
 // Compile the expression once
 const program = await CelProgram.compile(
@@ -140,72 +151,27 @@ This project consists of three main components:
 The native module is built using NAPI-RS and provides cross-platform support:
 
 - Platform-specific builds are named `cel-typescript.<platform>-<arch>.node`
-  (e.g., `cel-typescript.darwin-arm64.node` for Apple Silicon Macs)
-- NAPI-RS generates a platform-agnostic loader ([`index.js`](./index.js)) that
-  automatically detects the current platform and loads the appropriate `.node`
-  file
-- The module interface is defined in [`index.d.ts`](./index.d.ts) which declares
-  the types for the native module
-- At runtime, the TypeScript wrapper ([`src/index.ts`](./src/index.ts)) uses the
-  NAPI-RS loader to dynamically load the correct native module
+- NAPI-RS generates a platform-agnostic [loader][loader] that automatically
+  detects the current platform and loads the appropriate `.node` file
+- At runtime, the TypeScript [wrapper][wrapper] uses the NAPI-RS loader to
+  dynamically load the correct native module
 - This structure allows for seamless cross-platform distribution while
   maintaining platform-specific optimizations
 
-### Package Size and Platform Support
+[loader]: ./libs/core/src/native.cjs
+[wrapper]: ./libs/core/src/index.ts
 
-The npm package is relatively large (~37 MB unpacked) because it includes
-pre-compiled native binaries for all supported platforms:
+### Package Size
 
-- macOS (x64, arm64)
-- Linux (x64, arm64)
-- Windows (x64)
+Packages are sized at no more than 3 MB unpacked.
 
-However, when you install this package, npm will only extract the `.node` file
-for your platform. For example:
-
-- On Apple Silicon, only `cel-typescript.darwin-arm64.node` (~7.4 MB) is used
-- On Windows, only `cel-typescript.win32-x64.node` is used
-- On Linux, only `cel-typescript.linux-x64.node` or
-  `cel-typescript.linux-arm64.node` is used
-
-This is sometimes a pattern for packages with native bindings. For comparison:
-
-- [`better-sqlite3`][better-sqlite3]: 10.2 MB unpacked
-- [`canvas`][canvas]: 408 kB unpacked
-- [`sharp`][sharp]: 522 kB unpacked
-
-[better-sqlite3]: https://www.npmjs.com/package/better-sqlite3
-[canvas]: https://www.npmjs.com/package/canvas
-[sharp]: https://www.npmjs.com/package/sharp
-
-#### A Note on Tree-Shaking
-
-Tree-shaking (dead code elimination) primarily works with JavaScript modules and
-doesn't affect native binaries. The `.node` files are loaded dynamically at
-runtime based on the platform, so tree-shaking can't eliminate unused platform
-binaries during build time.
-
-However, the JavaScript/TypeScript portion of this package is tree-shakeable.
-For example, if you only use `evaluate()` and not `CelProgram`, a bundler like
-webpack or Rollup can exclude the unused code.
-
-### How it Works
-
-When you build this project:
-
-1. The Rust code in [`src/lib.rs`](./src/lib.rs) is compiled into a native
-   Node.js addon (`.node` file) using NAPI-RS
-2. The TypeScript code in [`src/index.ts`](./src/index.ts) is compiled to
-   JavaScript
-3. The native module is loaded by Node.js when you import the package
-
-The build process creates several important files:
-
-- `.node` file: The compiled native module containing the Rust code
-- [`index.js`](./index.js): The compiled JavaScript wrapper around the native
-  module
-- [`index.d.ts`](./index.d.ts): TypeScript type definitions generated from the
-  Rust code
+> | Platform                    | Package                                                                                                                              |
+> | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+> | macOS ARM64 (Apple Silicon) | [`@kevinmichaelchen/cel-typescript-darwin-arm64`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-darwin-arm64)       |
+> | macOS x64 (Intel)           | [`@kevinmichaelchen/cel-typescript-darwin-x64`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-darwin-x64)           |
+> | Linux x64                   | [`@kevinmichaelchen/cel-typescript-linux-x64-gnu`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-linux-x64-gnu)     |
+> | Linux ARM64                 | [`@kevinmichaelchen/cel-typescript-linux-arm64-gnu`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-linux-arm64-gnu) |
+> | Windows x64                 | [`@kevinmichaelchen/cel-typescript-win32-x64-msvc`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-win32-x64-msvc)   |
 
 ## Contributing
 
