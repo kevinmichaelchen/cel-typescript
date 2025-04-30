@@ -2,6 +2,14 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { CelProgram, evaluate } from "../src/index.js";
 
 describe("evaluate", () => {
+  it("should add a duration to a timestamp using chrono feature", async () => {
+    const result = await evaluate(
+      "timestamp('2023-01-01T00:00:00Z') + duration('1h')",
+      {},
+    );
+    // The expected result is '2023-01-01T01:00:00Z' as an ISO string
+    expect(result).toBe("2023-01-01T01:00:00Z");
+  });
   it("should evaluate a simple expression", async () => {
     const result = await evaluate("size(message) > 5", {
       message: "Hello World",
