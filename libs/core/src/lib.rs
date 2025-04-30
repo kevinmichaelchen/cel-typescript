@@ -1,7 +1,7 @@
 #![deny(clippy::all)]
 
+use cel_interpreter::{Context, Program, Value};
 use napi_derive::napi;
-use cel_interpreter::{Program, Context, Value};
 use serde_json::Value as JsonValue;
 use std::sync::Arc;
 
@@ -19,8 +19,8 @@ impl CelProgram {
 
     #[napi]
     pub fn compile(source: String) -> napi::Result<CelProgram> {
-        let program = Program::compile(&source)
-            .map_err(|e| napi::Error::from_reason(e.to_string()))?;
+        let program =
+            Program::compile(&source).map_err(|e| napi::Error::from_reason(e.to_string()))?;
         Ok(CelProgram { program })
     }
 
@@ -38,12 +38,12 @@ impl CelProgram {
                 } else {
                     Value::Null
                 }
-            },
+            }
             JsonValue::String(s) => Value::String(Arc::new(s.clone())),
             JsonValue::Array(arr) => {
                 let values: Vec<Value> = arr.iter().map(|v| Self::json_to_cel_value(v)).collect();
                 Value::List(Arc::new(values))
-            },
+            }
             JsonValue::Object(map) => {
                 let mut cel_map = std::collections::HashMap::new();
                 for (key, value) in map {
@@ -65,11 +65,20 @@ impl CelProgram {
                 .unwrap_or(JsonValue::Null),
             Value::String(s) => JsonValue::String((*s).to_string()),
             Value::List(list) => JsonValue::Array(
-                list.iter().map(|v| Self::cel_to_json_value(v.clone())).collect()
+                list.iter()
+                    .map(|v| Self::cel_to_json_value(v.clone()))
+                    .collect(),
             ),
             Value::Map(map) => JsonValue::Object(
-                map.map.iter().map(|(k, v)| (k.to_string(), Self::cel_to_json_value(v.clone()))).collect()
+                map.map
+                    .iter()
+                    .map(|(k, v)| (k.to_string(), Self::cel_to_json_value(v.clone())))
+                    .collect(),
             ),
+            Value::Timestamp(ts) => JsonValue::String(ts.to_rfc3339()),
+            Value::Duration(dur) => {
+                JsonValue::Number(serde_json::Number::from(dur.num_nanoseconds().unwrap_or(0)))
+            }
             _ => JsonValue::Null,
         }
     }
@@ -77,7 +86,7 @@ impl CelProgram {
     #[napi]
     pub fn execute(&self, context: JsonValue) -> napi::Result<JsonValue> {
         let mut ctx = Context::default();
-        
+
         if let JsonValue::Object(map) = context {
             for (key, value) in map {
                 let cel_value = Self::json_to_cel_value(&value);
@@ -85,7 +94,8 @@ impl CelProgram {
             }
         }
 
-        self.program.execute(&ctx)
+        self.program
+            .execute(&ctx)
             .map_err(|e| napi::Error::from_reason(e.to_string()))
             .map(Self::cel_to_json_value)
     }

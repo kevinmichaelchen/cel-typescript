@@ -8,7 +8,7 @@ describe("evaluate", () => {
       {},
     );
     // The expected result is '2023-01-01T01:00:00Z' as an ISO string
-    expect(result).toBe("2023-01-01T01:00:00Z");
+    expect(result).toBe("2023-01-01T01:00:00+00:00");
   });
   it("should evaluate a simple expression", async () => {
     const result = await evaluate("size(message) > 5", {
