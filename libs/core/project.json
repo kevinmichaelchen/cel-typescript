@@ -2,6 +2,10 @@
   "name": "@kevinmichaelchen/cel-typescript-core",
   "$schema": "node_modules/nx/schemas/project-schema.json",
   "targets": {
+    "build": {
+      "executor": "nx:noop",
+      "dependsOn": ["build:native", "build:ts"]
+    },
     "build:native": {
       "cache": false,
       "executor": "nx:run-commands",
@@ -25,10 +29,6 @@
         "command": "tsc -p {projectRoot}/tsconfig.json"
       },
       "outputs": ["{projectRoot}/dist/**/*"]
-    },
-    "build": {
-      "executor": "nx:noop",
-      "dependsOn": ["build:native", "build:ts"]
     },
     "clean": {
       "cache": false,
