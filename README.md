@@ -106,12 +106,7 @@ await timeProgram.execute({
 }); // true
 ```
 
-> [!NOTE]
->
-> Performance measurements on an Apple M3 Pro show that compiling a complex CEL
-> expression (with map/filter operations) takes about 1.4ms, while execution
-> takes about 0.7ms. The one-step `evaluate()` function takes roughly 2ms as it
-> performs both steps.
+> [!TIP]
 >
 > Consider pre-compiling expressions when:
 >
@@ -122,13 +117,19 @@ await timeProgram.execute({
 >
 > For one-off evaluations or when expressions change frequently, the convenience
 > of `evaluate()` likely outweighs the performance benefit of pre-compilation.
+>
+> Performance measurements on an Apple M3 Pro show that compiling a complex CEL
+> expression (with map/filter operations) takes about 1.4ms, while execution
+> takes about 0.7ms. The one-step `evaluate()` function takes roughly 2ms as it
+> performs both steps.
 
 ## Architecture
 
 This project consists of three main components:
 
-1. **cel-rust**: The underlying Rust implementation of the CEL interpreter,
-   created by clarkmcc. This provides the core CEL evaluation engine.
+1. [**cel-rust**][cel-rust]: The underlying Rust implementation of the CEL
+   interpreter, created by clarkmcc. This provides the core CEL evaluation
+   engine.
 
 2. **NAPI-RS Bindings**: A thin Rust layer that bridges cel-rust with Node.js
    using [NAPI-RS](https://napi.rs/). NAPI-RS is a framework for building
@@ -160,18 +161,6 @@ The native module is built using NAPI-RS and provides cross-platform support:
 
 [loader]: ./libs/core/src/native.cjs
 [wrapper]: ./libs/core/src/index.ts
-
-### Package Size
-
-Packages are sized at no more than 3 MB unpacked.
-
-> | Platform                    | Package                                                                                                                              |
-> | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-> | macOS ARM64 (Apple Silicon) | [`@kevinmichaelchen/cel-typescript-darwin-arm64`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-darwin-arm64)       |
-> | macOS x64 (Intel)           | [`@kevinmichaelchen/cel-typescript-darwin-x64`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-darwin-x64)           |
-> | Linux x64                   | [`@kevinmichaelchen/cel-typescript-linux-x64-gnu`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-linux-x64-gnu)     |
-> | Linux ARM64                 | [`@kevinmichaelchen/cel-typescript-linux-arm64-gnu`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-linux-arm64-gnu) |
-> | Windows x64                 | [`@kevinmichaelchen/cel-typescript-win32-x64-msvc`](https://www.npmjs.com/package/@kevinmichaelchen/cel-typescript-win32-x64-msvc)   |
 
 ## Contributing
 
