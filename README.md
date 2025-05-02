@@ -1,19 +1,15 @@
 # cel-typescript
 
-A TypeScript binding for the Common Expression Language (CEL) using
+A TypeScript binding for the [Common Expression Language (CEL)][cel-spec] using
 [cel-rust][cel-rust]. This project provides a Node.js native module that allows
 you to use CEL in your TypeScript/JavaScript projects.
 
+CEL is a familiar C/C++/Java/Python-like language for expressing boolean
+conditions, calculations, and variable substitutions. It's especially useful for
+policy enforcement, configuration validation, and business rule evaluation.
+
 [cel-spec]: https://github.com/google/cel-spec
 [cel-rust]: https://github.com/clarkmcc/cel-rust
-
-## What is CEL?
-
-[Common Expression Language (CEL)][cel-spec] is an expression language created
-by Google that implements common semantics for expression evaluation. It's a
-simple language for expressing boolean conditions, calculations, and variable
-substitutions. CEL is used in various Google products and open-source projects
-for policy enforcement, configuration validation, and business rule evaluation.
 
 ## Installation
 
@@ -117,25 +113,27 @@ await timeProgram.execute({
 >
 > For one-off evaluations or when expressions change frequently, the convenience
 > of `evaluate()` likely outweighs the performance benefit of pre-compilation.
->
-> Performance measurements on an Apple M3 Pro show that compiling a complex CEL
-> expression (with map/filter operations) takes about 1.4ms, while execution
-> takes about 0.7ms. The one-step `evaluate()` function takes roughly 2ms as it
-> performs both steps.
 
-## Alternatives
+## FAQ
+
+### Is it performant?
+
+Performance measurements on an Apple M3 Pro show that compiling a complex CEL
+expression (with map/filter operations) takes about 1.4ms, while execution takes
+about 0.7ms. The one-step `evaluate()` function takes roughly 2ms as it performs
+both steps.
+
+### Is it conformant / feature-complete?
 
 The underlying `cel-rust` library — and, by extension, this library — is more
 feature-complete than all of its peers in the JS/TS ecosystem here.
 
-> [!NOTE]
->
-> See the [cel-js-evaluation][cel-js-evaluation] repository for a comparison of
-> the features provided by this library and its peers.
+See the [cel-js-evaluation][cel-js-evaluation] repository for a comparison of
+the features provided by this library versus its peers.
 
 [cel-js-evaluation]: https://github.com/kevinmichaelchen/cel-js-evaluation
 
-## Architecture
+### What does the architecture look like?
 
 This project consists of three main components:
 
@@ -144,8 +142,8 @@ This project consists of three main components:
    engine.
 
 2. **NAPI-RS Bindings**: A thin Rust layer that bridges cel-rust with Node.js
-   using [NAPI-RS](https://napi.rs/). NAPI-RS is a framework for building
-   pre-compiled Node.js addons in Rust, providing:
+   using [NAPI-RS][napi]. NAPI-RS is a framework for building pre-compiled
+   Node.js addons in Rust, providing:
 
    - Type-safe bindings between Rust and Node.js
    - Cross-platform compilation support
@@ -159,7 +157,9 @@ This project consists of three main components:
 >
 > Only ESM is supported by this package.
 
-### Native Module Structure
+### How does NAPI work?
+
+[napi]: https://napi.rs/
 
 The native module is built using NAPI-RS and provides cross-platform support:
 
