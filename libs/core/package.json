@@ -28,8 +28,8 @@
   "optionalDependencies": {
     "@kevinmichaelchen/cel-typescript-darwin-arm64": "file:../darwin-arm64",
     "@kevinmichaelchen/cel-typescript-darwin-x64": "file:../darwin-x64",
-    "@kevinmichaelchen/cel-typescript-linux-x64-gnu": "file:../linux-x64-gnu",
     "@kevinmichaelchen/cel-typescript-linux-arm64-gnu": "file:../linux-arm64-gnu",
+    "@kevinmichaelchen/cel-typescript-linux-x64-gnu": "file:../linux-x64-gnu",
     "@kevinmichaelchen/cel-typescript-win32-x64-msvc": "file:../win32-x64-msvc"
   },
   "exports": {
@@ -54,5 +54,9 @@
         "x86_64-pc-windows-msvc"
       ]
     }
+  },
+  "devDependencies": {
+    "@adam-rocska/markdown-table": "^1.0.2",
+    "kelonio": "^0.10.0"
   }
 }
