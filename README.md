@@ -118,10 +118,12 @@ await timeProgram.execute({
 
 ### Is it performant?
 
-Performance measurements on an Apple M3 Pro show that compiling a complex CEL
-expression (with map/filter operations) takes about 1.4ms, while execution takes
-about 0.7ms. The one-step `evaluate()` function takes roughly 2ms as it performs
-both steps.
+Evaluations are easily sub-millisecond, more on the order of hundreds of
+microseconds. Compiling is a bit more expensive, but still rarely exceeds a
+millisecond.
+
+For more deatils, see
+[`benchmark-results.md`](libs/core/__tests__/benchmark-results.md).
 
 ### Is it conformant / feature-complete?
 
